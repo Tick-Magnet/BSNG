@@ -1,0 +1,26 @@
+A Disjoint-Set Data Structure based Parallel Sow & Grow (DBSCAN) clustering implementation (OpenMP version)
+
+How to run the tool:
+1. Compile the source files using the following command
+
+	make
+
+2. Run using following command 
+
+	./bsng -i filename -b -m minpts -e epsilon -o output -t threads
+
+	Example:
+
+	./bsng -i clus50k.bin -b -m 5 -e 25 -t 8 -o test
+
+	run the following to get detail description on the program arguments
+
+	./bsng ?
+
+3. Input file format:
+	
+	binary file:
+	number of points, N and number of dimensions, D (each 4 bytes) followed by the points coordinates (N x D floating point numbers).
+
+	text file:
+	each line is a point (no need to mention the number of points or the number of dimensions).
