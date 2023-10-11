@@ -332,7 +332,7 @@ namespace NWUClustering
 		dbs.m_pid_to_cid.resize(dbs.m_pts->m_i_num_points, 0);
 		dbs.m_clusters.clear();
 
-		//cout << "SNG ALGORITHMS============================" << endl;
+		cout << "SNG SEQUENTIAL ALGORITHM" << endl;
 
 		kdtree2_result_vector ne;
 		kdtree2_result_vector ne2;

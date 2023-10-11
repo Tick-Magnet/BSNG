@@ -101,8 +101,8 @@ int main(int argc, char** argv) {
 
     // Run the SNG clustering algorithms
     start = omp_get_wtime();
-    run_sng_algo(sng);
-    run_sng_algo_uf(sng);
+    run_sng_algo(sng); // Sequential 
+    //run_sng_algo_uf(sng);
     cout << "S&G (total) took " << omp_get_wtime() - start << " seconds." << endl;
 
 	
@@ -110,8 +110,8 @@ int main(int argc, char** argv) {
     if (outfilename != NULL) {
         ofstream outfile;
         outfile.open(outfilename);
-        sng.writeClusters_uf(outfile);
-        sng.writeClusters(outfile);
+        sng.writeClusters(outfile); //Sequential 
+        //sng.writeClusters_uf(outfile);
         outfile.close();
     }
 

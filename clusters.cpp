@@ -1,3 +1,5 @@
+//Clusters.cpp prepares the data for clustering, by reading the file and creating the kdtree.
+
 #include "clusters.h"
 
 namespace NWUClustering {
@@ -29,6 +31,7 @@ namespace NWUClustering {
 		if(isBinaryFile == 1) {
 			
 			///		Binary Text Files
+			cout << " - - -  Binary Text File Inputted - - - " << endl ;
 
 			ifstream file (infilename, ios::in|ios::binary);
 			if(file.is_open())
@@ -47,7 +50,6 @@ namespace NWUClustering {
                 for(int ll = 0; ll < num_points; ll++)
                     m_pts->m_points[ll].resize(dims);
 
-				
 				point_coord_type* pt;					
 				
                 pt = (point_coord_type*) malloc(dims * sizeof(point_coord_type));
@@ -71,6 +73,7 @@ namespace NWUClustering {
 		} else {
 			
 			///		Non-Binary Text Files
+			cout << " - - -  Non-Binary Text File Inputted - - - " << endl;
 
 			// Process text file
 			string line, line2, buf;
@@ -151,13 +154,14 @@ namespace NWUClustering {
             return -1;
         }
 
-        m_kdtree = new kdtree2(m_pts->m_points, false);
+        m_kdtree = new kdtree2(m_pts->m_points, false); //kdtree constructor
 
         if (m_kdtree == nullptr) {
             cout << "Failed to allocate a new kd tree" << endl;
             return -1;
         }
-
+		
+		cout << "kdtree successfully built" << endl ;
         return 0;
     }
 }

@@ -46,6 +46,7 @@ float kdtree2_result_vector::replace_maxpri_elt_return_new_maxpri(kdtree2_result
 }
 
 // Implementation of KDTREE2 constructor.
+
 kdtree2::kdtree2(array2dfloat& data_in, bool rearrange_in, int dim_in)
     : the_data(data_in),
       N(data_in.size()),
@@ -62,7 +63,8 @@ kdtree2::kdtree2(array2dfloat& data_in, bool rearrange_in, int dim_in)
 
   if (dim_in > 0)
     dim = dim_in;
-
+  
+  cout << "building kdtree " << endl;
   build_tree();
   
   if (rearrange) {
@@ -395,6 +397,16 @@ void kdtree2::r_nearest_around_point(int idxin, int correltime, float r2, kdtree
   }
 
   if (sort_results) sort(result.begin(), result.end());
+
+   // Output the results to the console
+    cout << "Results for point " << idxin << ":" << endl;
+    for (int i = 0; i < result.size(); i++) {
+        cout << "Index: " << result[i].idx << " Data: ";
+        for (int d = 0; d < dim; d++) {
+            cout << the_data[result[i].idx][d] << " ";
+        }
+        cout << endl;
+    }
 }
 
 // Count elements within a specified radius around a point.
