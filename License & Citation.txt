@@ -23,7 +23,7 @@
 
 
 // (c) Matthew B. Kennel, Institute for Nonlinear Science, UCSD (2004)
-//
+
 // Licensed under the Academic Free License version 1.1 found in file LICENSE
 // with additional provisions in that same file.
 
@@ -31,4 +31,4 @@
 
 //The original concept and design framework of the Sow & Grow Algorithm and Focus Clustering was developed by Dr. Dunren Che. 
 
-
+//BSNG - Jacob R. Bowers
