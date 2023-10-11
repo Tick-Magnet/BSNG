@@ -1,3 +1,6 @@
+// Usage ./generator random_points.bin random_points.txt 20 1 20
+// Compile: g++ -o generator generator.cpp
+
 #include <iostream>
 #include <fstream>
 #include <random>
