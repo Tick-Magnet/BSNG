@@ -6,6 +6,7 @@
 static void usage(char* argv0) {
     const char* params =
         "Usage: %s [switches] -i filename -b -m minpts -e epsilon -o output -t threads\n"
+	"Example: ./bsng -i clus50k.bin -b -m 5 -e 25 -t 8 -o output\n"
         "    -i filename     : file containing input data to be clustered\n"
         "    -b isBinary     : input file is in binary format (default no)\n"
         "    -m minpts       : input parameter of BSNG, min points to form a cluster, e.g. 2\n"
