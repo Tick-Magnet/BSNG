@@ -18,7 +18,7 @@ namespace NWUClustering
 		virtual ~ClusteringAlgo();
 
 		//Set parameters for the S&G Algorithm
-		void set_sng_params(double eps, int minPts);
+		void set_sng_params(double eps, int minPts, int seeds);
 		
 		// Write Clusters using the regular SNG Algorithm
 		void writeClusters(ostream& o); 
@@ -31,6 +31,7 @@ namespace NWUClustering
 		// Parameters for running the SNG algorithm
 		double 	m_epsSquare;
 		int 	m_minPts;
+		int	    m_seeds;
   
 		// Noise vector to mark noise points
         vector<bool> m_noise;
@@ -53,6 +54,9 @@ namespace NWUClustering
 
     // Run the regular SNG algorithm
     void run_sng_algo(ClusteringAlgo& dbs);
+
+	// Run the regular DBSCAN algorithm
+    void run_dbscan_algo(ClusteringAlgo& dbs);
 };
 
 #endif

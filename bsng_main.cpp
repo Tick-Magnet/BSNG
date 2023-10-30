@@ -6,10 +6,12 @@
 static void usage(char* argv0) {
     const char* params =
         "Usage: %s [switches] -i filename -b -m minpts -e epsilon -o output -t threads\n"
+	"Example: ./bsng -i clus50k.bin -b -m 5 -e 25 -t 8 -o output\n"
         "    -i filename     : file containing input data to be clustered\n"
-        "    -b              : input file is in binary format (default no)\n"
+        "    -b isBinary     : input file is in binary format (default no)\n"
         "    -m minpts       : input parameter of BSNG, min points to form a cluster, e.g. 2\n"
         "    -e epsilon      : input parameter of BSNG, radius or threshold on neighborhoods retrieved, e.g. 0.8\n"
+        "    -s seeds        : input parameter of Sow-n-Grow, number of seeds to be chosen from each partition of data\n"
         "    -o output       : clustering results, format, (each line, point id, clusterid)\n"
         "    -t threads      : number of threads to be employed\n\n";
 
@@ -19,14 +21,9 @@ static void usage(char* argv0) {
 
 
 int main(int argc, char** argv) {
-    double seconds;
-    int opt;
-
-    int minPts, threads;
-    int classical = 0;
-    double eps;
+    double seconds, eps;
+    int minPts, threads, opt, seeds, classical, isBinaryFile;
     char* outfilename = NULL;
-    int isBinaryFile;
     char* infilename = NULL;
 
     // Initialize default values
@@ -36,8 +33,10 @@ int main(int argc, char** argv) {
     outfilename = NULL;
     infilename = NULL;
     threads = -1;
+    seeds = -1;
+    classical = 0;
 
-    while ((opt = getopt(argc, argv, "i:t:d:p:m:e:o:v:z:bxghncul")) != EOF) {
+    while ((opt = getopt(argc, argv, "i:t:d:p:m:e:s:o:v:z:bxghncul")) != EOF) {
         switch (opt) {
             case 'i':
                 infilename = optarg;
@@ -53,6 +52,9 @@ int main(int argc, char** argv) {
                 break;
             case 'e':
                 eps = atof(optarg);
+                break;
+            case 's':
+                seeds = atoi(optarg);
                 break;
             case 'o':
                 outfilename = optarg;
@@ -70,7 +72,7 @@ int main(int argc, char** argv) {
     }
 
 	// Check if required options are provided
-    if (infilename == NULL || minPts < 0 || eps < 0 || threads < 1) {
+    if (infilename == NULL || minPts < 0 || seeds < 0 || eps < 0 || threads < 1) {
         usage(argv[0]);
         exit(-1);
     }
@@ -80,9 +82,9 @@ int main(int argc, char** argv) {
 
     // Create an instance of the ClusteringAlgo class
     NWUClustering::ClusteringAlgo sng;
-    sng.set_sng_params(eps, minPts);
+    sng.set_sng_params(eps, minPts, seeds);
 
-    cout << "Input parameters " << " minPts " << minPts << " eps " << eps << endl;
+    cout << "Input parameters " << " minPts " << minPts << " eps " << eps << " seeds " << seeds << endl;
 
     // Measure the start time
     double start = omp_get_wtime();

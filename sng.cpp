@@ -1,11 +1,13 @@
 #include "sng.h"
+#include <random>
 
 namespace NWUClustering
 {
 	// Set SNG algorithm parameters
-    void ClusteringAlgo::set_sng_params(double eps, int minPts) {
+    void ClusteringAlgo::set_sng_params(double eps, int minPts, int seeds) {
 		m_epsSquare =  eps * eps;
 		m_minPts =  minPts;
+		m_seeds = seeds;
 	}
 
 	// Destructor to clean up resources
@@ -104,26 +106,26 @@ namespace NWUClustering
 	}
 
 	// Run the Union-Find version of the SNG clustering algorithm
-	void run_sng_algo_uf(ClusteringAlgo& dbs)
+	void run_sng_algo_uf(ClusteringAlgo& sng)
 	{			
 		int tid, i, pid, j, k, npid, root, root1, root2;
  
         // Initialize clustering parameters
-		dbs.m_clusters.clear();
+		sng.m_clusters.clear();
 		kdtree2_result_vector ne;
 			
 		// assign parent to itestf
-		dbs.m_parents.resize(dbs.m_pts->m_i_num_points, -1);
-		dbs.m_member.resize(dbs.m_pts->m_i_num_points, 0);
-		dbs.m_corepoint.resize(dbs.m_pts->m_i_num_points, 0);
+		sng.m_parents.resize(sng.m_pts->m_i_num_points, -1);
+		sng.m_member.resize(sng.m_pts->m_i_num_points, 0);
+		sng.m_corepoint.resize(sng.m_pts->m_i_num_points, 0);
 
 		int sch, maxthreads = omp_get_max_threads();
 		
 		// Calculate the thread distribution
-		if(dbs.m_pts->m_i_num_points % maxthreads == 0)
-			sch = dbs.m_pts->m_i_num_points/maxthreads;
+		if(sng.m_pts->m_i_num_points % maxthreads == 0)
+			sch = sng.m_pts->m_i_num_points/maxthreads;
 		else
-			sch = dbs.m_pts->m_i_num_points/maxthreads + 1;
+			sch = sng.m_pts->m_i_num_points/maxthreads + 1;
 		
 		vector < vector <int > > merge;
 		vector <int> init;
@@ -131,12 +133,12 @@ namespace NWUClustering
 
 		// Reserve space for merge vector
 		for(tid = 0; tid < maxthreads; tid++)
-			merge[tid].reserve(dbs.m_pts->m_i_num_points);
+			merge[tid].reserve(sng.m_pts->m_i_num_points);
 		
 		vector < int > prID;
-		prID.resize(dbs.m_pts->m_i_num_points, -1);
+		prID.resize(sng.m_pts->m_i_num_points, -1);
 
-		vector<int>* ind = dbs.m_kdtree->getIndex();		
+		vector<int>* ind = sng.m_kdtree->getIndex();		
 
 		double start = omp_get_wtime();	
 
@@ -148,12 +150,12 @@ namespace NWUClustering
         	lower = sch * tid;
 	        upper = sch * (tid + 1);
 
-        	if(upper > dbs.m_pts->m_i_num_points)
-		        upper = dbs.m_pts->m_i_num_points;
+        	if(upper > sng.m_pts->m_i_num_points)
+		        upper = sng.m_pts->m_i_num_points;
 
 	    	for(i = lower; i < upper; i++) {
 				pid = (*ind)[i]; 
-				dbs.m_parents[pid] = pid;
+				sng.m_parents[pid] = pid;
 				prID[pid] = tid;
 			}
 
@@ -164,11 +166,11 @@ namespace NWUClustering
 				pid = (*ind)[i];
 
 				ne.clear();
-            	dbs.m_kdtree->r_nearest_around_point(pid, 0, dbs.m_epsSquare, ne);
+            	sng.m_kdtree->r_nearest_around_point(pid, 0, sng.m_epsSquare, ne);
 
-				if(ne.size() >= dbs.m_minPts) {
-					dbs.m_corepoint[pid] = 1;
-					dbs.m_member[pid] = 1;
+				if(ne.size() >= sng.m_minPts) {
+					sng.m_corepoint[pid] = 1;
+					sng.m_member[pid] = 1;
 					
 					// Get the root containing pid
 					root = pid;
@@ -185,34 +187,34 @@ namespace NWUClustering
 						root1 = npid;
 						root2 = root;
 
-						if(dbs.m_corepoint[npid] == 1 || dbs.m_member[npid] == 0) {
-							dbs.m_member[npid] = 1;
+						if(sng.m_corepoint[npid] == 1 || sng.m_member[npid] == 0) {
+							sng.m_member[npid] = 1;
 	
 							// REMS algorithm to merge the trees
-							while(dbs.m_parents[root1] != dbs.m_parents[root2]) {
-								if(dbs.m_parents[root1] < dbs.m_parents[root2]) {
-									if(dbs.m_parents[root1] == root1) {
-										dbs.m_parents[root1] = dbs.m_parents[root2];
-										root = dbs.m_parents[root2];
+							while(sng.m_parents[root1] != sng.m_parents[root2]) {
+								if(sng.m_parents[root1] < sng.m_parents[root2]) {
+									if(sng.m_parents[root1] == root1) {
+										sng.m_parents[root1] = sng.m_parents[root2];
+										root = sng.m_parents[root2];
 										break;
 									}
 
 				        	        // Splicing
-                	        		int z = dbs.m_parents[root1];
-				            	    dbs.m_parents[root1] = dbs.m_parents[root2];
+                	        		int z = sng.m_parents[root1];
+				            	    sng.m_parents[root1] = sng.m_parents[root2];
                     	       		root1 = z;
 
 								} else {
 
-									if(dbs.m_parents[root2] == root2) {
-										dbs.m_parents[root2] = dbs.m_parents[root1];
-										root = dbs.m_parents[root1];
+									if(sng.m_parents[root2] == root2) {
+										sng.m_parents[root2] = sng.m_parents[root1];
+										root = sng.m_parents[root1];
 										break;
 									}
 
 					   	       		// Splicing
-				        	        int z = dbs.m_parents[root2];
-            	                	dbs.m_parents[root2] = dbs.m_parents[root1];					
+				        	        int z = sng.m_parents[root2];
+            	                	sng.m_parents[root2] = sng.m_parents[root1];					
 									root2 = z;
 								}
 							}
@@ -229,13 +231,13 @@ namespace NWUClustering
 
 		// Allocate and initiate locks
     	omp_lock_t *nlocks;
-		nlocks = (omp_lock_t *) malloc(dbs.m_pts->m_i_num_points*sizeof(omp_lock_t));
+		nlocks = (omp_lock_t *) malloc(sng.m_pts->m_i_num_points*sizeof(omp_lock_t));
 
 		//Start = Stop;
 		start = omp_get_wtime();
 
 		#pragma omp parallel for private(i) shared(nlocks)
-    	for(i = 0; i < dbs.m_pts->m_i_num_points; i++) 
+    	for(i = 0; i < sng.m_pts->m_i_num_points; i++) 
       		omp_init_lock(&nlocks[i]); // initialize locks
 
 		#pragma omp parallel for shared(maxthreads, merge, nlocks) private(i, v1, v2, root1, root2, size, tid)
@@ -247,13 +249,13 @@ namespace NWUClustering
 				v2 = merge[tid][2 * i + 1];
 		
 				int con = 0;
-				if(dbs.m_corepoint[v2] == 1)
+				if(sng.m_corepoint[v2] == 1)
 					con = 1;
-				else if(dbs.m_member[v2] == 0) {
+				else if(sng.m_member[v2] == 0) {
                 	omp_set_lock(&nlocks[v2]);
-                    if(dbs.m_member[v2] == 0) { // If v2 is not a member yet
+                    if(sng.m_member[v2] == 0) { // If v2 is not a member yet
                         con = 1;
-						dbs.m_member[v2] = 1;
+						sng.m_member[v2] = 1;
                     }
                     	omp_unset_lock(&nlocks[v2]);
 				}
@@ -265,14 +267,14 @@ namespace NWUClustering
 					root2 = v2;
 
 					// REMS algorithm with splicing compression techniques
-					while (dbs.m_parents[root1] != dbs.m_parents[root2]) {
-						if (dbs.m_parents[root1] < dbs.m_parents[root2]) {
+					while (sng.m_parents[root1] != sng.m_parents[root2]) {
+						if (sng.m_parents[root1] < sng.m_parents[root2]) {
 							
-							if(dbs.m_parents[root1] == root1) { // root1 is a root
+							if(sng.m_parents[root1] == root1) { // root1 is a root
 								omp_set_lock(&nlocks[root1]);
 								int p_set = false;
-								if(dbs.m_parents[root1] == root1) { // If root1 is still a root
-									dbs.m_parents[root1] = dbs.m_parents[root2];
+								if(sng.m_parents[root1] == root1) { // If root1 is still a root
+									sng.m_parents[root1] = sng.m_parents[root2];
 									p_set = true;
 								}
 								omp_unset_lock(&nlocks[root1]);
@@ -281,16 +283,16 @@ namespace NWUClustering
 							}
 	
 							// splicing
-							int z = dbs.m_parents[root1];
-							dbs.m_parents[root1] = dbs.m_parents[root2];
+							int z = sng.m_parents[root1];
+							sng.m_parents[root1] = sng.m_parents[root2];
 							root1 = z;
 
 						} else {
-							if(dbs.m_parents[root2] == root2) { // root2 is a root			
+							if(sng.m_parents[root2] == root2) { // root2 is a root			
                 	            omp_set_lock(&nlocks[root2]);
                     	        int p_set = false;
-                        	    if(dbs.m_parents[root2] == root2) { // Check if root2 is a root			
-       				                dbs.m_parents[root2] = dbs.m_parents[root1];
+                        	    if(sng.m_parents[root2] == root2) { // Check if root2 is a root			
+       				                sng.m_parents[root2] = sng.m_parents[root1];
                                 	p_set = true;
 	                            }
     	                        omp_unset_lock(&nlocks[root2]);
@@ -299,8 +301,8 @@ namespace NWUClustering
                 	        }
 							
 							//Splicing
-				        	int z = dbs.m_parents[root2];
-                           	dbs.m_parents[root2] = dbs.m_parents[root1];
+				        	int z = sng.m_parents[root2];
+                           	sng.m_parents[root2] = sng.m_parents[root1];
  	                        root2 = z;
 						}	
 					}
@@ -319,62 +321,67 @@ namespace NWUClustering
 		ne.clear();
 	}
 	
-	// Run the Sequential SNG clustering algorithm
-	void run_sng_algo(ClusteringAlgo& dbs) {
+
+
+
+
+
+	// Run the Sequential DBSCAN clustering algorithm (CLEAN)
+	void run_sngcan_algo(ClusteringAlgo& sng) {
 		int i, pid, j, k, npid;
 		int cid = 1; // cluster id
 		vector <int> c;
-		c.reserve(dbs.m_pts->m_i_num_points);
+		c.reserve(sng.m_pts->m_i_num_points);
 
     	// Initialize clustering parameters
-		dbs.m_noise.resize(dbs.m_pts->m_i_num_points, false);
-        dbs.m_visited.resize(dbs.m_pts->m_i_num_points, false);		
-		dbs.m_pid_to_cid.resize(dbs.m_pts->m_i_num_points, 0);
-		dbs.m_clusters.clear();
+		sng.m_noise.resize(sng.m_pts->m_i_num_points, false);
+        sng.m_visited.resize(sng.m_pts->m_i_num_points, false);		
+		sng.m_pid_to_cid.resize(sng.m_pts->m_i_num_points, 0);
+		sng.m_clusters.clear();
 
 		cout << "SNG SEQUENTIAL ALGORITHM" << endl;
 
 		kdtree2_result_vector ne;
 		kdtree2_result_vector ne2;
 		//kdtree2_result_vector ne3;
-		ne.reserve(dbs.m_pts->m_i_num_points);
-		ne2.reserve(dbs.m_pts->m_i_num_points);
+		ne.reserve(sng.m_pts->m_i_num_points);
+		ne2.reserve(sng.m_pts->m_i_num_points);
 
-		vector<int>* ind = dbs.m_kdtree->getIndex();
+		vector<int>* ind = sng.m_kdtree->getIndex();
 
 		double start = omp_get_wtime() ;		
 
 		// Iterate through points
-		for(i = 0; i < dbs.m_pts->m_i_num_points; i++) {
+		for(i = 0; i < sng.m_pts->m_i_num_points; i++) {
 			pid = (*ind)[i];
 
-			if (!dbs.m_visited[pid]) {
-				dbs.m_visited[pid] = true;
+			if (!sng.m_visited[pid]) {
+				sng.m_visited[pid] = true;
 				ne.clear();
-				dbs.m_kdtree->r_nearest_around_point(pid, 0, dbs.m_epsSquare, ne);
+				sng.m_kdtree->r_nearest_around_point(pid, 0, sng.m_epsSquare, ne);
 				
-				if(ne.size() < dbs.m_minPts)
-					dbs.m_noise[pid] = true;
+				if(ne.size() < sng.m_minPts)
+					sng.m_noise[pid] = true;
 				else {
 					// Start a new cluster
 					c.clear();
 					c.push_back(pid);
-					dbs.m_pid_to_cid[pid] = cid;
+					sng.m_pid_to_cid[pid] = cid;
 
 					// Traverse the neighbors
 					for (j = 0; j < ne.size(); j++) {
 						npid= ne[j].idx;
 
 						// Not already visited
-						if(!dbs.m_visited[npid]) {
-							dbs.m_visited[npid] = true;
+						if(!sng.m_visited[npid]) {
+							sng.m_visited[npid] = true;
 	
 							// Explore neighbors of neighbors
 							ne2.clear();
-							dbs.m_kdtree->r_nearest_around_point(npid, 0, dbs.m_epsSquare, ne2);
+							sng.m_kdtree->r_nearest_around_point(npid, 0, sng.m_epsSquare, ne2);
 
 							// Sufficient support
-							if (ne2.size() >= dbs.m_minPts)	{
+							if (ne2.size() >= sng.m_minPts)	{
 								// Join Clusters
 								for(k = 0; k < ne2.size(); k++)
 									ne.push_back(ne2[k]);
@@ -382,14 +389,126 @@ namespace NWUClustering
 						}
 
 						// Not already assigned to a cluster
-						if (!dbs.m_pid_to_cid[npid]) {
+						if (!sng.m_pid_to_cid[npid]) {
 							c.push_back(npid);
-							dbs.m_pid_to_cid[npid]=cid;
-							dbs.m_noise[npid] = false;
+							sng.m_pid_to_cid[npid]=cid;
+							sng.m_noise[npid] = false;
 						}
 					}
 
-					dbs.m_clusters.push_back(c);
+					sng.m_clusters.push_back(c);
+					cid++;
+				}	
+			}
+		}
+		
+	    double stop = omp_get_wtime();
+        cout << "Local computation took " << stop - start << " seconds." << endl;
+		cout << "No merging stage in classical SNG"<< endl;
+		ind = NULL;
+		ne.clear();
+		ne2.clear();
+	}
+
+
+	// Run the Sequential SNG clustering algorithm
+	void run_sng_algo(ClusteringAlgo& sng) {
+		int i, pid, j, k, npid;
+		int cid = 1; // cluster id
+		vector <int> c;
+		c.reserve(sng.m_pts->m_i_num_points);
+
+
+		// Select m_seeds random points
+		vector<int> random_seeds;
+		random_seeds.reserve(sng.m_seeds);
+
+		std::random_device rd;
+		std::mt19937 gen(rd());
+		std::uniform_int_distribution<int> dis(0, sng.m_pts->m_i_num_points - 1);
+
+		cout << "Selected random point(s):" << endl; // Print selected points
+
+		while (random_seeds.size() < sng.m_seeds) {
+			int random_index = dis(gen);
+
+			// Check if the point has not been selected before
+			if (std::find(random_seeds.begin(), random_seeds.end(), random_index) == random_seeds.end()) {
+				random_seeds.push_back(random_index);
+				cout << random_index << " "; // Print the selected point
+			}
+		}
+
+		cout << endl; // Print a newline to separate the list
+
+
+
+
+    	// Initialize clustering parameters
+		sng.m_noise.resize(sng.m_pts->m_i_num_points, false);
+        sng.m_visited.resize(sng.m_pts->m_i_num_points, false);		
+		sng.m_pid_to_cid.resize(sng.m_pts->m_i_num_points, 0);
+		sng.m_clusters.clear();
+
+		cout << "SNG SEQUENTIAL ALGORITHM" << endl;
+		cout << sng.m_seeds << endl;
+
+		kdtree2_result_vector ne;
+		kdtree2_result_vector ne2;
+	
+		ne.reserve(sng.m_pts->m_i_num_points);
+		ne2.reserve(sng.m_pts->m_i_num_points);
+
+		vector<int>* ind = sng.m_kdtree->getIndex();
+
+		double start = omp_get_wtime() ;		
+
+		// Iterate through points
+		for (int i = 0; i < sng.m_seeds; i++) {
+        	int pid = random_seeds[i];
+
+			if (!sng.m_visited[pid]) {
+				sng.m_visited[pid] = true;
+				ne.clear();
+				sng.m_kdtree->r_nearest_around_point(pid, 0, sng.m_epsSquare, ne);
+				
+				if(ne.size() < sng.m_minPts)
+					sng.m_noise[pid] = true;
+				else {
+					// Start a new cluster
+					c.clear();
+					c.push_back(pid);
+					sng.m_pid_to_cid[pid] = cid;
+
+					// Traverse the neighbors
+					for (j = 0; j < ne.size(); j++) {
+						npid= ne[j].idx;
+
+						// Not already visited
+						if(!sng.m_visited[npid]) {
+							sng.m_visited[npid] = true;
+	
+							// Explore neighbors of neighbors
+							ne2.clear();
+							sng.m_kdtree->r_nearest_around_point(npid, 0, sng.m_epsSquare, ne2);
+
+							// Sufficient support
+							if (ne2.size() >= sng.m_minPts)	{
+								// Join Clusters
+								for(k = 0; k < ne2.size(); k++)
+									ne.push_back(ne2[k]);
+							}
+						}
+
+						// Not already assigned to a cluster
+						if (!sng.m_pid_to_cid[npid]) {
+							c.push_back(npid);
+							sng.m_pid_to_cid[npid]=cid;
+							sng.m_noise[npid] = false;
+						}
+					}
+
+					sng.m_clusters.push_back(c);
 					cid++;
 				}	
 			}
