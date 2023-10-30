@@ -11,7 +11,7 @@ How to run the tool:
 
 	Example:
 
-	./bsng -i clus50k.bin -b -m 5 -e 25 -t 8 -o output
+	./bsng -i clus50k.bin -b -m 5 -e 25 -t 8 -o test
 
 	run the following to get detail description on the program arguments
 

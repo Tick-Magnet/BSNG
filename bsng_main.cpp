@@ -22,9 +22,10 @@ static void usage(char* argv0) {
 
 int main(int argc, char** argv) {
     double seconds, eps;
-    int minPts, threads, opt, seeds, classical, isBinaryFile;
+    int minPts, threads, opt, seeds;
     char* outfilename = NULL;
     char* infilename = NULL;
+    bool classical, isBinaryFile;
 
     // Initialize default values
     minPts = -1;
@@ -34,7 +35,8 @@ int main(int argc, char** argv) {
     infilename = NULL;
     threads = -1;
     seeds = -1;
-    classical = 0;
+    classical = false;
+    isBinaryFile = false;
 
     while ((opt = getopt(argc, argv, "i:t:d:p:m:e:s:o:v:z:bxghncul")) != EOF) {
         switch (opt) {
@@ -43,9 +45,6 @@ int main(int argc, char** argv) {
                 break;
             case 't':
                 threads = atoi(optarg);
-                break;
-            case 'b':
-                isBinaryFile = 1;
                 break;
             case 'm':
                 minPts = atoi(optarg);
@@ -60,7 +59,10 @@ int main(int argc, char** argv) {
                 outfilename = optarg;
                 break;
             case 'c':
-                classical = 1;
+                classical = true;
+                break;
+            case 'b':
+                isBinaryFile = true;
                 break;
             case '?':
                 usage(argv[0]);
@@ -103,8 +105,13 @@ int main(int argc, char** argv) {
 
     // Run the SNG clustering algorithms
     start = omp_get_wtime();
-    run_sng_algo(sng); // Sequential 
-    //run_sng_algo_uf(sng);
+
+    if (classical == true) {
+        run_sng_algo(sng); // Sequential 
+    } else {
+        run_sng_algo_uf(sng); // Parallel
+    }
+        
     cout << "S&G (total) took " << omp_get_wtime() - start << " seconds." << endl;
 
 	
@@ -112,8 +119,13 @@ int main(int argc, char** argv) {
     if (outfilename != NULL) {
         ofstream outfile;
         outfile.open(outfilename);
-        sng.writeClusters(outfile); //Sequential 
-        //sng.writeClusters_uf(outfile);
+
+            if (classical == true) {
+            sng.writeClusters(outfile); //Sequential 
+        } else {
+            sng.writeClusters_uf(outfile); // Parallel
+        }
+
         outfile.close();
     }
 
