@@ -4,6 +4,8 @@
 
 #include "utils.h"
 #include "clusters.h"
+#include <queue>
+#include <random>
 
 namespace NWUClustering
 {
@@ -18,7 +20,7 @@ namespace NWUClustering
 		virtual ~ClusteringAlgo();
 
 		//Set parameters for the S&G Algorithm
-		void set_sng_params(double eps, int minPts);
+		void set_sng_params(double eps, int minPts, int seeds);
 		
 		// Write Clusters using the regular SNG Algorithm
 		void writeClusters(ostream& o); 
@@ -31,6 +33,7 @@ namespace NWUClustering
 		// Parameters for running the SNG algorithm
 		double 	m_epsSquare;
 		int 	m_minPts;
+		int 	m_seeds;
   
 		// Noise vector to mark noise points
         vector<bool> m_noise;
