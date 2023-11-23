@@ -1,6 +1,2 @@
-/// SPLIT The Queues between the Threads
 /// GUI Interface Different Types of Seed Inputs
 /// Calculate Error Between Actual VS. Found (15% Seeds - Compared to Total Cluster)
-
-//Don't Understand why it puts starting seed into the queue again? 
-//I.E. 18 -> 9 8 18
