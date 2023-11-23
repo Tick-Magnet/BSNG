@@ -52,10 +52,10 @@ namespace NWUClustering
 	};	
 
     // Run the union-find SNG algorithm
-    void run_sng_algo_uf(ClusteringAlgo& dbs);
+    void run_sng_algo_uf(ClusteringAlgo& sng);
 
     // Run the regular SNG algorithm
-    void run_sng_algo(ClusteringAlgo& dbs);
+    void run_sng_algo(ClusteringAlgo& sng);
 };
 
 #endif

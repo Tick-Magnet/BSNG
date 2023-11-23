@@ -127,7 +127,7 @@ int main(int argc, char** argv) {
             if (classical == true) {
             sng.writeClusters(outfile); //Sequential 
         } else {
-            //sng.writeClusters_uf(outfile); // Parallel
+            sng.writeClusters_uf(outfile); // Parallel
         }
 
         outfile.close();

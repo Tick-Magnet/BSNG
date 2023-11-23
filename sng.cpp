@@ -135,7 +135,7 @@ void run_sng_algo_uf(ClusteringAlgo& sng) {
         // Check if the point has not been selected before
         if (std::find(random_seeds.begin(), random_seeds.end(), random_index) == random_seeds.end()) {
             random_seeds.push_back(random_index);
-            cout << random_index << " "; 
+            cout << random_index << "!" << endl; 
         }
     }
     cout << endl; 
@@ -169,7 +169,7 @@ void run_sng_algo_uf(ClusteringAlgo& sng) {
     }
 
 
-	//Loop through every point.
+	//Loop through every point assign default parent.
 	for (int point_id = 0; point_id < sng.m_pts->m_i_num_points; ++point_id) {
     	sng.m_parents[point_id] = point_id;
 	}
@@ -202,43 +202,49 @@ void run_sng_algo_uf(ClusteringAlgo& sng) {
 
 			// Debugging code to print the contents of the queue
 			cout << "Contents of pointQueue: ";
-			queue<int> tempQueue = pointQueue; // Create a temporary queue for printing
+            queue<int> tempQueue = pointQueue; // Create a temporary queue for printing
 			while (!tempQueue.empty()) {
 				cout << tempQueue.front() << " ";
 				tempQueue.pop();
 			}
 			cout << endl;
 
-
-
+            //Select Front of Queue
 			int currentPoint = pointQueue.front();
             pointQueue.pop();
+            cout << "CurrentPoint: " << currentPoint << endl;
+            cout << "m_member: " << sng.m_member[currentPoint] <<endl;
+            cout << "m_corepoint: " << sng.m_corepoint[currentPoint] <<endl;
 
             // Find core points and neighbors for currentPoint
             neighbors.clear();
             sng.m_kdtree->r_nearest_around_point(currentPoint, 0, sng.m_epsSquare, neighbors);
 
-            if (neighbors.size() >= sng.m_minPts && sng.m_member[currentPoint] == 0) {
-                cout << "Core Point" << endl;
-				sng.m_corepoint[neighbor_point_id] = 1;
+            if (neighbors.size() >= sng.m_minPts && sng.m_corepoint[currentPoint] != 1) {
+                cout << "Added: " << currentPoint << " as a Core Point" << endl;
+				sng.m_corepoint[currentPoint] = 1;
+                cout << "Updated m_corepoint: " << sng.m_corepoint[currentPoint] <<endl;
 				sng.m_member[currentPoint] = 1;
+
                 // Get the root containing currentPoint
                 root = currentPoint;
-                cout << root << ": top root" << endl;
-
+            
                 for (j = 0; j < neighbors.size(); j++) {
                     
 					neighbor_point_id = neighbors[j].idx;
+                    cout << "Neighborhood Point ID: " << neighbor_point_id <<endl;
 
                     root1 = neighbor_point_id;
                     root2 = root;
 
-                    if (sng.m_corepoint[neighbor_point_id] == 1 || sng.m_member[neighbor_point_id] == 0) {
+                    if (sng.m_member[neighbor_point_id] == 0) {
+                        cout << "Assigning Membership to: " << neighbor_point_id << endl;
+                        
                         sng.m_member[neighbor_point_id] = 1;
 
                         // Union-Find algorithm to merge the trees
                         while (sng.m_parents[root1] != sng.m_parents[root2]) {
-							cout << "Union Find" << endl;
+							//cout << "Union Find" << endl;
                             if (sng.m_parents[root1] < sng.m_parents[root2]) {
                                 if (sng.m_parents[root1] == root1) {
                                     sng.m_parents[root1] = sng.m_parents[root2];
@@ -264,11 +270,12 @@ void run_sng_algo_uf(ClusteringAlgo& sng) {
                         }
                     }	
 					
-                    // If the neighbor is a core point, add it to the queue
-					cout << sng.m_corepoint[neighbor_point_id] << ": is corepoint?" << endl;
-					if (sng.m_corepoint[neighbor_point_id] == 0) {
+                    //If the neighbor hasn't been searched and it's the same point, add it to the queue.
+					cout << "Checking if " << neighbor_point_id << ": should be added to queue" << endl;
+					if (sng.m_corepoint[neighbor_point_id] == 0){
+                        sng.m_corepoint[neighbor_point_id] = -1;
 						pointQueue.push(neighbor_point_id);
-						cout << "Added New Point!" << endl;
+						cout << "Added Point to Queue: " << neighbor_point_id << endl;
 					}
                 }
             } 
