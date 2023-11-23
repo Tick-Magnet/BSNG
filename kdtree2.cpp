@@ -398,14 +398,14 @@ void kdtree2::r_nearest_around_point(int idxin, int correltime, float r2, kdtree
 
   if (sort_results) sort(result.begin(), result.end());
 
-   // Output the results to the console
-    cout << "Results for point " << idxin << ":" << endl;
+    // Output the results to the console
+    //cout << "Results for point " << idxin << ":" << endl;
     for (int i = 0; i < result.size(); i++) {
-        cout << "Index: " << result[i].idx << " Data: ";
+        //cout << "Index: " << result[i].idx << " Data: ";
         for (int d = 0; d < dim; d++) {
-            cout << the_data[result[i].idx][d] << " ";
+            //cout << the_data[result[i].idx][d] << " ";
         }
-        cout << endl;
+        //cout << endl;
     }
 }
 

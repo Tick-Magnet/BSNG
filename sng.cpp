@@ -200,30 +200,34 @@ void run_sng_algo_uf(ClusteringAlgo& sng) {
 
         while (!pointQueue.empty()) {
 
-			// Debugging code to print the contents of the queue
-			cout << "Contents of pointQueue: ";
-            queue<int> tempQueue = pointQueue; // Create a temporary queue for printing
-			while (!tempQueue.empty()) {
-				cout << tempQueue.front() << " ";
-				tempQueue.pop();
-			}
-			cout << endl;
+            #pragma omp critical
+            {
+                // Debugging code to print the contents of the queue
+                cout << "Contents of " << thread_id << " pointQueue: ";
+                queue<int> tempQueue = pointQueue; // Create a temporary queue for printing
+                while (!tempQueue.empty()) {
+                    cout << tempQueue.front() << " ";
+                    tempQueue.pop();
+                }
+                cout << endl;
+            }
+			
 
             //Select Front of Queue
 			int currentPoint = pointQueue.front();
             pointQueue.pop();
-            cout << "CurrentPoint: " << currentPoint << endl;
-            cout << "m_member: " << sng.m_member[currentPoint] <<endl;
-            cout << "m_corepoint: " << sng.m_corepoint[currentPoint] <<endl;
+            //cout << "CurrentPoint: " << currentPoint << endl;
+            //cout << "m_member: " << sng.m_member[currentPoint] <<endl;
+            //cout << "m_corepoint: " << sng.m_corepoint[currentPoint] <<endl;
 
             // Find core points and neighbors for currentPoint
             neighbors.clear();
             sng.m_kdtree->r_nearest_around_point(currentPoint, 0, sng.m_epsSquare, neighbors);
 
             if (neighbors.size() >= sng.m_minPts && sng.m_corepoint[currentPoint] != 1) {
-                cout << "Added: " << currentPoint << " as a Core Point" << endl;
+                //cout << "Added: " << currentPoint << " as a Core Point" << endl;
 				sng.m_corepoint[currentPoint] = 1;
-                cout << "Updated m_corepoint: " << sng.m_corepoint[currentPoint] <<endl;
+                //cout << "Updated m_corepoint: " << sng.m_corepoint[currentPoint] <<endl;
 				sng.m_member[currentPoint] = 1;
 
                 // Get the root containing currentPoint
@@ -232,13 +236,13 @@ void run_sng_algo_uf(ClusteringAlgo& sng) {
                 for (j = 0; j < neighbors.size(); j++) {
                     
 					neighbor_point_id = neighbors[j].idx;
-                    cout << "Neighborhood Point ID: " << neighbor_point_id <<endl;
+                    //cout << "Neighborhood Point ID: " << neighbor_point_id <<endl;
 
                     root1 = neighbor_point_id;
                     root2 = root;
 
                     if (sng.m_member[neighbor_point_id] == 0) {
-                        cout << "Assigning Membership to: " << neighbor_point_id << endl;
+                        //cout << "Assigning Membership to: " << neighbor_point_id << endl;
                         
                         sng.m_member[neighbor_point_id] = 1;
 
@@ -271,11 +275,11 @@ void run_sng_algo_uf(ClusteringAlgo& sng) {
                     }	
 					
                     //If the neighbor hasn't been searched and it's the same point, add it to the queue.
-					cout << "Checking if " << neighbor_point_id << ": should be added to queue" << endl;
+					//cout << "Checking if " << neighbor_point_id << ": should be added to queue" << endl;
 					if (sng.m_corepoint[neighbor_point_id] == 0){
                         sng.m_corepoint[neighbor_point_id] = -1;
 						pointQueue.push(neighbor_point_id);
-						cout << "Added Point to Queue: " << neighbor_point_id << endl;
+						//cout << "Added Point to Queue: " << neighbor_point_id << endl;
 					}
                 }
             } 
