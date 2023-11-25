@@ -1,0 +1,27 @@
+- - - Sequential SNG Clustering Output - - -
+Key: -1 = Noise | 0 = Unclustered | > 0 = Cluster ID
+
+ID | Cluster
+ 0 | 1
+ 1 | 1
+ 2 | 0
+ 3 | -1
+ 4 | 0
+ 5 | 0
+ 6 | 0
+ 7 | 0
+ 8 | 0
+ 9 | 0
+10 | 1
+11 | 0
+12 | 0
+13 | 1
+14 | 1
+15 | 0
+16 | 1
+17 | 0
+18 | 0
+19 | 0
+
+Total points 20 | pts_cls 6 | noise 1 | pts_uncls 13
+Number of clusters: 1

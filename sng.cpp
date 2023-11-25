@@ -17,31 +17,65 @@ namespace NWUClustering
 		m_parents.clear();
 		m_corepoint.clear();
 		m_member.clear();
+        selected_seeds.clear();
 	}
 	
+
+    //TODO: Add Seeds to Output file!
+
+
 	// Write clusters to the output stream
 	void ClusteringAlgo::writeClusters(ostream& o) {
-		// Writing point id and cluster id pairs per line; noise has cluster id 0	
-		int iMaxID = m_clusters.size(), id, i, j;
-		for(i = 0; i < m_pts->m_i_num_points; i++) {
-
-			id = m_pid_to_cid[i];
-			o << i << " " << id << endl;
-		}
+		
+        // Writing point id and cluster id pairs per line; noise has cluster id 0	
+		int iMaxID = m_clusters.size(), id, i;
 
 		int sum_points = 0;
 		int noise = 0;
+        int unclustered = 0;
+
+        o << "- - - Sequential SNG Clustering Output - - -" << endl;
+        o << "Key: -1 = Noise | 0 = Unclustered | > 0 = Cluster ID" << endl;
+        o << endl;
+        o << "ID" << " | " << "Cluster" << endl; 
+
+		for(i = 0; i < m_pts->m_i_num_points; i++) {
+
+			id = m_pid_to_cid[i];
+            if (id == 0 && m_visited[i]) {
+                id = -1;
+            }
+
+            //Formatting for Output
+            if (i < 10){
+                o << " " << i << " | " << id << endl;
+            } else {
+                o << i << " | " << id << endl;
+            }
+		}
+
 		for(i = 0; i < m_clusters.size(); i++) {
 			sum_points += m_clusters[i].size();
 		}
 	
 		for (i = 0; i < m_pts->m_i_num_points; i++) {
-			if(m_noise[i])
-				noise++;
+			if(m_noise[i]) {
+                noise++;
+            }	
 		}	
-		
+
+        for (int i = 0; i < m_pts->m_i_num_points; i++) {
+            if (!m_visited[i]) {
+                unclustered++;
+            }
+        }
+
 		// Output summary information
-		cout << "Total points " << noise + sum_points << " pt_in_cls " << sum_points << " noise " << noise << endl;
+        o << endl;
+        o << "Total points " << unclustered + noise + sum_points << " | pts_cls " << sum_points << " | noise " << noise << " | pts_uncls " << unclustered << endl;
+        o << "Number of clusters: " << m_clusters.size() << endl;
+
+		cout << "Total points " << unclustered + noise + sum_points << " | pts_cls " << sum_points << " | noise " << noise << " | pts_uncls " << unclustered << endl;
 		cout << "Number of clusters: " << m_clusters.size() << endl;
 	}
 
@@ -95,26 +129,70 @@ namespace NWUClustering
 			// Skip if i is not a root
    		}
 
+        o << "- - - Sequential SNG Clustering Output - - -" << endl;
+        o << "Key: 0 = Noise | -1 = Unclustered | > 0 = Cluster ID" << endl;
+        o << " " << endl;
+        o << "ID" << " | " << "Cluster" << endl; 
+
+        //TODO: Switch Noise and Unclustered!
+
 		// Write point id and cluster ids to the output stream
 		for (i = 0; i < m_pts->m_i_num_points; i++) {
 			o << i << " " << clusters[m_parents[i]] << endl;
-			
 		}
-
+        
 		// Output summary information
+        o << endl;
+        o << "Total points " << noise + sum_points << " pt_in_cls " << sum_points << " noise " << noise << endl;
+        o << "Number of clusters: " << count << endl;
+
 		cout << "Total points " << noise + sum_points << " pt_in_cls " << sum_points << " noise " << noise << endl;
 		cout << "Number of clusters: " << count << endl;
 
 		clusters.clear();
 	}
 
+    
+
+    void seed_selection(ClusteringAlgo& sng) {
+        cout << "Seed Selection | # of Seeds: " << sng.m_seeds << endl;
+        //TODO: Add other Seed Selection Methodologies 
 
 
+        //Random Point Seed Selection - m_seeds random points
+        cout << "Random Seed Selection" << endl;
+        sng.selected_seeds.reserve(sng.m_seeds);
+
+        // Check if there are more points than seeds
+        if (sng.m_seeds >= sng.m_pts->m_i_num_points) {
+            cout << "Error: Number of seeds is greater than or equal to the number of points. Aborting." << endl;
+            exit(-1);
+        }
+
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_int_distribution<int> dis(0, sng.m_pts->m_i_num_points - 1);
+
+        cout << "Selected random point(s): "; 
+
+        while (sng.selected_seeds.size() < sng.m_seeds) {
+            int random_index = dis(gen);
+
+            //Checks if point hasn't been selected previously.
+            if (std::find(sng.selected_seeds.begin(), sng.selected_seeds.end(), random_index) == sng.selected_seeds.end()) {
+                sng.selected_seeds.push_back(random_index);
+                cout << random_index << " "; 
+            }
+        }
+
+        cout << endl; // Print a newline to end seed list
+
+    }
 
 
 // Run the Union-Find version of the Sow-and-Grow (SNG) clustering algorithm
 void run_sng_algo_uf(ClusteringAlgo& sng) {	
-    cout << endl; 
+
     cout << "SNG Parallel ALGORITHM" << endl;
     cout << sng.m_seeds << ": seeds" << endl;
     cout << sng.m_pts->m_i_num_points << ": total points" << endl;
@@ -377,55 +455,17 @@ void run_sng_algo_uf(ClusteringAlgo& sng) {
     neighbors.clear();
 }
 
-
-
-
-
-
-
-
-
 // Run the Sequential Sow & Grow (SNG) Clustering Algorithm
 void run_sng_algo(ClusteringAlgo& sng) {
-		
-	cout << endl; 
-	cout << "SNG SEQUENTIAL ALGORITHM" << endl;
-	cout << sng.m_seeds << endl;
-		
-	// Select m_seeds random points
-	vector<int> random_seeds;
-	random_seeds.reserve(sng.m_seeds);
-
-	// Check if there are more points than seeds
-    if (sng.m_seeds >= sng.m_pts->m_i_num_points) {
-        cout << "Error: Number of seeds is greater than or equal to the number of points. Aborting." << endl;
-        exit(-1);
-    }
-
-	std::random_device rd;
-	std::mt19937 gen(rd());
-	std::uniform_int_distribution<int> dis(0, sng.m_pts->m_i_num_points - 1);
-
-	cout << "Selected random point(s):" << endl; // Print selected points
-
-	while (random_seeds.size() < sng.m_seeds) {
-		int random_index = dis(gen);
-
-		// Check if the point has not been selected before
-		if (std::find(random_seeds.begin(), random_seeds.end(), random_index) == random_seeds.end()) {
-			random_seeds.push_back(random_index);
-			cout << random_index << " "; // Print the selected point
-		}
-	}
-
-	cout << endl; // Print a newline to separate the list
-
-
-		
+	
+    //Select Seeds for Algorithm
+	seed_selection(sng);
+	
 	int i, pid, j, k, npid;
 	int cid = 1; // cluster id
 	vector <int> c;
 	c.reserve(sng.m_pts->m_i_num_points);
+    
 
    	// Initialize clustering parameters
 	sng.m_noise.resize(sng.m_pts->m_i_num_points, false);
@@ -447,13 +487,14 @@ void run_sng_algo(ClusteringAlgo& sng) {
 
 	// Iterate through points
 	for (int i = 0; i < sng.m_seeds; i++) {
-       	int pid = random_seeds[i];
+       	int pid = sng.selected_seeds[i];
 
 		if (!sng.m_visited[pid]) {
 			sng.m_visited[pid] = true;
 			ne.clear();
 			sng.m_kdtree->r_nearest_around_point(pid, 0, sng.m_epsSquare, ne);
-				
+			
+            //If neighborhood size is too small, assign as noise.
 			if(ne.size() < sng.m_minPts)
 				sng.m_noise[pid] = true;
 			else {
@@ -495,7 +536,7 @@ void run_sng_algo(ClusteringAlgo& sng) {
 			}	
 		}
 	}
-		
+
     double stop = omp_get_wtime();
     cout << "Local computation took " << stop - start << " seconds." << endl;
 	cout << "No merging stage in classical SNG"<< endl;

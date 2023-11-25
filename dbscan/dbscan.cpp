@@ -1,15 +1,15 @@
-#include "sng.h"
+#include "dbscan.h"
 
 namespace NWUClustering
 {
-	// Set SNG algorithm parameters
-    void ClusteringAlgo::set_sng_params(double eps, int minPts) {
+	// Set DBS algorithm parameters
+    void ClusteringAlgoDBS::set_dbs_params(double eps, int minPts) {
 		m_epsSquare =  eps * eps;
 		m_minPts =  minPts;
 	}
 
 	// Destructor to clean up resources
-	ClusteringAlgo::~ClusteringAlgo() {
+	ClusteringAlgoDBS::~ClusteringAlgoDBS() {
 		m_noise.clear();
 		m_visited.clear();
 		m_parents.clear();
@@ -18,7 +18,7 @@ namespace NWUClustering
 	}
 	
 	// Write clusters to the output stream
-	void ClusteringAlgo::writeClusters(ostream& o) {
+	void ClusteringAlgoDBS::writeClustersDBS(ostream& o) {
 		// Writing point id and cluster id pairs per line; noise has cluster id 0	
 		int iMaxID = m_clusters.size(), id, i, j;
 		for(i = 0; i < m_pts->m_i_num_points; i++) {
@@ -43,7 +43,7 @@ namespace NWUClustering
 		cout << "Number of clusters: " << m_clusters.size() << endl;
 	}
 
-	void ClusteringAlgo::writeClusters_uf(ostream& o)
+	void ClusteringAlgoDBS::writeClusters_ufDBS(ostream& o)
 	{
 		// Writing point id and cluster id pairs per line; noise has cluster id 0	
 		vector <int> clusters;
@@ -103,8 +103,8 @@ namespace NWUClustering
 		clusters.clear();
 	}
 
-	// Run the Union-Find version of the SNG clustering algorithm
-	void run_sng_algo_uf(ClusteringAlgo& dbs)
+	// Run the Union-Find version of the DBS clustering algorithm
+	void run_dbs_algo_uf(ClusteringAlgoDBS& dbs)
 	{			
 		int tid, i, pid, j, k, npid, root, root1, root2;
  
@@ -319,8 +319,8 @@ namespace NWUClustering
 		ne.clear();
 	}
 	
-	// Run the Sequential SNG clustering algorithm
-	void run_sng_algo(ClusteringAlgo& dbs) {
+	// Run the Sequential DBS clustering algorithm
+	void run_dbs_algo(ClusteringAlgoDBS& dbs) {
 		int i, pid, j, k, npid;
 		int cid = 1; // cluster id
 		vector <int> c;
@@ -332,7 +332,7 @@ namespace NWUClustering
 		dbs.m_pid_to_cid.resize(dbs.m_pts->m_i_num_points, 0);
 		dbs.m_clusters.clear();
 
-		cout << "SNG SEQUENTIAL ALGORITHM" << endl;
+		cout << "DBS SEQUENTIAL ALGORITHM" << endl;
 
 		kdtree2_result_vector ne;
 		kdtree2_result_vector ne2;
@@ -397,7 +397,7 @@ namespace NWUClustering
 		
 	    double stop = omp_get_wtime();
         cout << "Local computation took " << stop - start << " seconds." << endl;
-		cout << "No merging stage in classical SNG"<< endl;
+		cout << "No merging stage in classical DBS"<< endl;
 		ind = NULL;
 		ne.clear();
 		ne2.clear();
