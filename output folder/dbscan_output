@@ -1,0 +1,27 @@
+- - - Sequential DBSCAN Clustering Output - - -
+Key: 0 = Noise | > 0 = Cluster ID
+
+ID | Cluster
+ 0 | 1
+ 1 | 1
+ 2 | 0
+ 3 | 2
+ 4 | 4
+ 5 | 4
+ 6 | 2
+ 7 | 3
+ 8 | 2
+ 9 | 3
+10 | 1
+11 | 3
+12 | 3
+13 | 1
+14 | 1
+15 | 4
+16 | 1
+17 | 2
+18 | 3
+19 | 2
+
+Total points 20 pt_in_cls 19 noise 1
+Number of clusters: 4

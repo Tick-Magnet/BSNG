@@ -1,4 +1,5 @@
 #include "sng.h"
+#include "dbscan.h"
 #include "utils.h"
 #include "kdtree2.hpp"
 
@@ -44,7 +45,7 @@ int main(int argc, char** argv) {
     isBinaryFile = false;
     dbscan = false;
 
-    while ((opt = getopt(argc, argv, "i:t:d:p:m:e:s:o:v:z:bxghncul")) != EOF) {
+    while ((opt = getopt(argc, argv, "i:t:p:m:e:s:o:v:z:bdxghncul")) != EOF) {
         switch (opt) {
             case 'i':
                 infilename = optarg;
@@ -80,10 +81,16 @@ int main(int argc, char** argv) {
                 usage(argv[0]);
                 break;
         }
+
+        //printf("opt: %c, optarg: %s\n", opt, optarg); //Debugging for Arguments
     }
 
     if (dbscan == false) //By Default Run SNG
     {
+        cout << endl;
+        cout << "   || SOW & GROW ||    " << endl;
+        cout << endl;
+
         // Check if required options are provided
         if (infilename == NULL || minPts < 0 || seeds < 0 || eps < 0 || threads < 1) {
             usage(argv[0]);
@@ -145,9 +152,72 @@ int main(int argc, char** argv) {
 
             outfile.close();
         }
+
     } else {
-        //Add DBSCAN
-        cout << "DBSCAN" << endl;
+        cout << endl;
+        cout << "   || DBSCAN ||    " << endl;
+        cout << endl;
+
+        // Check if required options are provided
+        if (infilename == NULL || minPts < 0 || eps < 0 || threads < 1) {
+            usage(argv[0]);
+            exit(-1);
+        }
+
+        // Set the number of OpenMP threads
+        omp_set_num_threads(threads);
+
+        // Create an instance of the ClusteringAlgo class
+        NWUClustering::ClusteringAlgoDBS dbs;
+        dbs.set_dbs_params(eps, minPts);
+
+        cout << "Input parameters " << " minPts " << minPts << " eps " << eps << endl;
+
+        // Measure the time to Read File Data
+        cout << "Reading points from file: " << infilename << endl;
+        double start = omp_get_wtime();
+
+        // Read input data from the file
+        if (dbs.read_file(infilename, isBinaryFile) == -1) {
+            cout << "File Reading Failed." << endl;
+            exit(-1);
+        }
+
+        cout << "Reading input data file took: " << omp_get_wtime() - start << " seconds." << endl;
+
+        // Build a k-d tree for the points
+        cout << "Begin Building kdtree." << endl;
+        start = omp_get_wtime();
+        dbs.build_kdtree();
+        cout << "Building kdtree took: " << omp_get_wtime() - start << " seconds." << endl;
+
+        // Run the SNG clustering algorithms
+        start = omp_get_wtime();
+
+        //Selecting Algorithm 
+        cout << endl; 
+        if (classical == true) {
+            cout << "- DBSCAN SEQUENTIAL ALGORITHM -" << endl;
+            run_dbs_algo(dbs); // Sequential 
+        } else {
+            cout << "- DBSCAN Parallel ALGORITHM -" << endl;
+            run_dbs_algo_uf(dbs); // Parallel
+        }
+            
+        cout << "DBSCAN (total) took " << omp_get_wtime() - start << " seconds." << endl;
+
+        // If an output filename is provided, write clustering results to the file
+        if (outfilename != NULL) {
+            ofstream outfile;
+            outfile.open(outfilename);
+                if (classical == true) {
+                dbs.writeClustersDBS(outfile); //Sequential 
+            } else {
+                dbs.writeClusters_ufDBS(outfile); // Parallel
+            }
+
+            outfile.close();
+        }
     }
 
 	

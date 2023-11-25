@@ -21,11 +21,23 @@ namespace NWUClustering
 	void ClusteringAlgoDBS::writeClustersDBS(ostream& o) {
 		// Writing point id and cluster id pairs per line; noise has cluster id 0	
 		int iMaxID = m_clusters.size(), id, i, j;
+
+		o << "- - - Sequential DBSCAN Clustering Output - - -" << endl;
+        o << "Key: 0 = Noise | > 0 = Cluster ID" << endl;
+        o << endl;
+        o << "ID" << " | " << "Cluster" << endl; 
+
 		for(i = 0; i < m_pts->m_i_num_points; i++) {
 
 			id = m_pid_to_cid[i];
-			o << i << " " << id << endl;
-		}
+
+			//Formatting for Output
+            if (i < 10){
+                o << " " << i << " | " << id << endl;
+            } else {
+                o << i << " | " << id << endl;
+            }
+		} 
 
 		int sum_points = 0;
 		int noise = 0;
@@ -39,8 +51,13 @@ namespace NWUClustering
 		}	
 		
 		// Output summary information
+		o << endl;
+		o << "Total points " << noise + sum_points << " pt_in_cls " << sum_points << " noise " << noise << endl;
+		o << "Number of clusters: " << m_clusters.size() << endl;
+
 		cout << "Total points " << noise + sum_points << " pt_in_cls " << sum_points << " noise " << noise << endl;
 		cout << "Number of clusters: " << m_clusters.size() << endl;
+
 	}
 
 	void ClusteringAlgoDBS::writeClusters_ufDBS(ostream& o)
