@@ -69,14 +69,16 @@ namespace NWUClustering
                 unclustered++;
             }
         }
+    
+
+        cout << "Total points " << unclustered + noise + sum_points << " | pts_cls " << sum_points << " | noise " << noise << " | pts_uncls " << unclustered << endl;
+		cout << "Number of clusters: " << m_clusters.size() << endl;
 
 		// Output summary information
         o << endl;
         o << "Total points " << unclustered + noise + sum_points << " | pts_cls " << sum_points << " | noise " << noise << " | pts_uncls " << unclustered << endl;
         o << "Number of clusters: " << m_clusters.size() << endl;
 
-		cout << "Total points " << unclustered + noise + sum_points << " | pts_cls " << sum_points << " | noise " << noise << " | pts_uncls " << unclustered << endl;
-		cout << "Number of clusters: " << m_clusters.size() << endl;
 	}
 
 	void ClusteringAlgo::writeClusters_uf(ostream& o)
@@ -144,7 +146,7 @@ namespace NWUClustering
         o << "Total points " << noise + sum_points << " pt_in_cls " << sum_points << " noise " << noise << endl;
         o << "Number of clusters: " << count << endl;
 
-		cout << "Total points " << noise + sum_points << " pt_in_cls " << sum_points << " noise " << noise << endl;
+        cout << "Total points " << noise + sum_points << " pt_in_cls " << sum_points << " noise " << noise << endl;
 		cout << "Number of clusters: " << count << endl;
 
 		clusters.clear();
@@ -157,7 +159,11 @@ namespace NWUClustering
         cout << endl;
         cout << "Seed Selection | # of Seeds: " << sng.m_seeds << endl;
         //TODO: Add other Seed Selection Methodologies 
-
+        //Switch 
+        //Random 
+        //Sections (X-Y) | 1st Fourth
+        //Odds & Evens 
+ 
 
         //Random Point Seed Selection - m_seeds random points
         cout << "Random Seed Selection" << endl;
@@ -173,7 +179,7 @@ namespace NWUClustering
         std::mt19937 gen(rd());
         std::uniform_int_distribution<int> dis(0, sng.m_pts->m_i_num_points - 1);
 
-        cout << "Selected random point(s): "; 
+        //cout << "Selected random point(s): "; 
 
         while (sng.selected_seeds.size() < sng.m_seeds) {
             int random_index = dis(gen);
@@ -181,7 +187,7 @@ namespace NWUClustering
             //Checks if point hasn't been selected previously.
             if (std::find(sng.selected_seeds.begin(), sng.selected_seeds.end(), random_index) == sng.selected_seeds.end()) {
                 sng.selected_seeds.push_back(random_index);
-                cout << random_index << " "; 
+                //cout << random_index << " "; 
             }
         }
 
@@ -194,12 +200,14 @@ namespace NWUClustering
 void run_sng_algo_uf(ClusteringAlgo& sng) {	
    
     //Select Seeds for Algorithm
-	seed_selection(sng);
+	//seed_selection(sng);
 
     // Add two numbers to the selected_seeds vector
-    //sng.selected_seeds.reserve(sng.m_seeds);
-    //sng.selected_seeds.push_back(14);
-    //sng.selected_seeds.push_back(0);
+    sng.selected_seeds.reserve(sng.m_seeds);
+    sng.selected_seeds.push_back(9);
+    sng.selected_seeds.push_back(0);
+    sng.selected_seeds.push_back(6);
+    sng.selected_seeds.push_back(4);
 
     int thread_id, i, j, k, neighbor_point_id, point_id, root, root1, root2;
     int max_threads = omp_get_max_threads();
@@ -212,8 +220,7 @@ void run_sng_algo_uf(ClusteringAlgo& sng) {
     sng.m_member.resize(sng.m_pts->m_i_num_points, 0);
     sng.m_corepoint.resize(sng.m_pts->m_i_num_points, 0);
 
-    
-    
+
     vector<vector<int>> merge;
     vector<int> init;
     merge.resize(max_threads, init);
@@ -236,15 +243,19 @@ void run_sng_algo_uf(ClusteringAlgo& sng) {
 	for (int point_id = 0; point_id < sng.m_pts->m_i_num_points; ++point_id) {
     	sng.m_parents[point_id] = point_id;
 	}
-
+    
     // Initialize queue for point expansion
     vector<queue<int>> pointQueues(max_threads); // Create a vector of queues, one for each thread
 
-    vector < int > prID;
-	prID.resize(sng.m_pts->m_i_num_points, -1);
 
-    #pragma omp parallel private(root, root1, root2, prID, thread_id, neighbors, neighbor_point_id, i, j, point_id) shared(pointQueues, sng)
+    vector<int> prID; 
+    prID.resize(sng.m_pts->m_i_num_points, -1);
+
+
+    #pragma omp parallel private(root, root1, root2, thread_id, neighbors, neighbor_point_id, i, j, point_id) shared(pointQueues, sng, prID)
     {
+
+        //Get Thread ID
         thread_id = omp_get_thread_num();
         queue<int>& pointQueue = pointQueues[thread_id];
 
@@ -256,6 +267,7 @@ void run_sng_algo_uf(ClusteringAlgo& sng) {
         #pragma omp critical
         {
             cout << "Thread " << thread_id << " processes seeds from " << start_seed << " to " << end_seed - 1 << endl;
+            cout << "Size of prID vector: " << prID.size() << endl;
         }
 
 
@@ -282,31 +294,37 @@ void run_sng_algo_uf(ClusteringAlgo& sng) {
 			int currentPoint = pointQueue.front();
             pointQueue.pop();
 
+            prID[currentPoint] = thread_id;
+    
             // Find core points and neighbors for currentPoint
             neighbors.clear();
             sng.m_kdtree->r_nearest_around_point(currentPoint, 0, sng.m_epsSquare, neighbors);
 
             if (neighbors.size() >= sng.m_minPts && sng.m_corepoint[currentPoint] != 1) {
                 
-                //cout << "Added: " << currentPoint << " as a Core Point" << endl;
+
 				sng.m_corepoint[currentPoint] = 1;
-                //cout << "Updated m_corepoint: " << sng.m_corepoint[currentPoint] <<endl;
 				sng.m_member[currentPoint] = 1;
                 // Get the root containing currentPoint
                 root = currentPoint;
             
+
+                //TODO: Sort Neighbor points by highest.
+
                 for (j = 0; j < neighbors.size(); j++) {
                     
 					neighbor_point_id = neighbors[j].idx;
-                    //cout << "Neighborhood Point ID: " << neighbor_point_id <<endl;
 
-                    //cout << "Neighborhood Point Thread ID: " << prID[neighbor_point_id] << " | Current Point Thread ID: " << prID[neighbor_point_id] << endl;
+                    //cout << "Requesting to Merge | Neighborhood Point Thread ID: " << prID[neighbor_point_id] << " | Current Point Thread ID: " << prID[neighbor_point_id] << endl;
                     //If point Thread ID isn't in this thread THEN threads should merge.
-					//if(prID[neighbor_point_id] !=  (-1 || prID[currentPoint])) {
-					//	merge[thread_id].push_back(neighbor_point_id);
-					//	merge[thread_id].push_back(neighbor_point_id);
-					//	continue;
-				    //}
+					if(prID[neighbor_point_id] != -1 &&  prID[neighbor_point_id] != prID[currentPoint]) {
+						
+                        //cout << "Requesting to Merge | Neighborhood Point Thread ID: " << prID[neighbor_point_id] << " | Current Point Thread ID: " << prID[currentPoint] << endl;
+                        //cout << "Neighborhood Point: " << neighbor_point_id << " | Current Point: " << currentPoint << endl;
+                        merge[thread_id].push_back(neighbor_point_id);
+                        merge[thread_id].push_back(currentPoint);
+                        continue; 
+				    }
 
                     root1 = neighbor_point_id;
                     root2 = root;
@@ -373,12 +391,11 @@ void run_sng_algo_uf(ClusteringAlgo& sng) {
     #pragma omp parallel for shared(max_threads, merge, node_locks) private(i, vertex1, vertex2, root1, root2, merge_size, thread_id)
     for (thread_id = 0; thread_id < max_threads; thread_id++) {
         merge_size = merge[thread_id].size() / 2;
-        cout << "Merge Size:" << merge_size << endl;
+        cout << merge_size << endl;
         for (i = 0; i < merge_size; i++) {
             vertex1 = merge[thread_id][2 * i];
             vertex2 = merge[thread_id][2 * i + 1];
             int should_merge = 0;
-            cout << "Here 1" << endl;
             if (sng.m_corepoint[vertex2] == 1)
                 should_merge = 1;
             else if (sng.m_member[vertex2] == 0) {
@@ -388,16 +405,17 @@ void run_sng_algo_uf(ClusteringAlgo& sng) {
                     sng.m_member[vertex2] = 1;
                 }
                 omp_unset_lock(&node_locks[vertex2]);
-                cout << "Here 2" << endl;
             }
 
             if (should_merge == 1) {
-                cout << endl;
-                cout << "SHOULD MERGE!" << endl;
-                cout << endl;
+                //cout << endl;
+                //cout << "SHOULD_MERGE!" << endl;
                 // Union-Find based approach for merging
                 root1 = vertex1;
                 root2 = vertex2;
+
+                //cout << "Root1: " << root1 << endl;
+                //cout << "Root2: " << root2 << endl;
 
                 // Union-Find algorithm with splicing compression techniques
                 while (sng.m_parents[root1] != sng.m_parents[root2]) {
@@ -437,9 +455,18 @@ void run_sng_algo_uf(ClusteringAlgo& sng) {
                         root2 = temp;
                     }
                 }
+                //cout << "Root1: " << root1 << endl;
+                //cout << "Root2: " << root2 << endl;
             }
         }
     }
+
+    for (int i = 0; i < sng.m_pts->m_i_num_points; ++i) {
+		cout << "Point " << i << ": Parent = " << sng.m_parents[i] << endl;
+	}
+
+
+
     stop_time = omp_get_wtime();
     free(node_locks);
     cout << "Merging took " << stop_time - start_time << " seconds." << endl;
@@ -479,6 +506,7 @@ void run_sng_algo(ClusteringAlgo& sng) {
 
 	vector<int>* ind = sng.m_kdtree->getIndex();
 
+    cout << "Start" << endl;
 	double start = omp_get_wtime() ;		
 
 	// Iterate through points

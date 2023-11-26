@@ -37,7 +37,7 @@ namespace NWUClustering
             } else {
                 o << i << " | " << id << endl;
             }
-		} 
+		}
 
 		int sum_points = 0;
 		int noise = 0;
@@ -276,7 +276,9 @@ namespace NWUClustering
 				}
 
 				if(con == 1) {
-				
+					
+					cout << "Should Merge" << endl;
+
 					// lLock based approach for merging
 					root1 = v1;
 					root2 = v2;
@@ -323,6 +325,10 @@ namespace NWUClustering
 					}
 				}
 			}
+		}
+
+		for (int i = 0; i < dbs.m_pts->m_i_num_points; ++i) {
+		cout << "Point " << i << ": Parent = " << dbs.m_parents[i] << endl;
 		}
 
 		stop = omp_get_wtime();
