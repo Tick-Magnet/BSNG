@@ -68,6 +68,11 @@ namespace NWUClustering
 
 		int i, j, sum_points = 0, noise = 0, root, rootcount = 0, tmp;
 
+		o << "- - - Parallel DBSCAN Clustering Output - - -" << endl;
+        o << "Key: 0 = Noise | > 0 = Cluster ID" << endl;
+        o << endl;
+        o << "ID" << " | " << "Cluster" << endl; 
+
 		// Calculate cluster information
 		for(i = 0; i < m_pts->m_i_num_points; i++) {
 			root = m_parents[i];
@@ -110,10 +115,14 @@ namespace NWUClustering
 
 		// Write point id and cluster ids to the output stream
 		for (i = 0; i < m_pts->m_i_num_points; i++) {
-			o << i << " " << clusters[m_parents[i]] << endl;
+			o << i << " | " << clusters[m_parents[i]] << endl;
 		}
 
 		// Output summary information
+		o << endl;
+		o << "Total points " << noise + sum_points << " pt_in_cls " << sum_points << " noise " << noise << endl;
+		o << "Number of clusters: " << count << endl;
+
 		cout << "Total points " << noise + sum_points << " pt_in_cls " << sum_points << " noise " << noise << endl;
 		cout << "Number of clusters: " << count << endl;
 
@@ -277,7 +286,7 @@ namespace NWUClustering
 
 				if(con == 1) {
 					
-					cout << "Should Merge" << endl;
+					//cout << "Should Merge" << endl;
 
 					// lLock based approach for merging
 					root1 = v1;
@@ -327,13 +336,10 @@ namespace NWUClustering
 			}
 		}
 
-		for (int i = 0; i < dbs.m_pts->m_i_num_points; ++i) {
-		cout << "Point " << i << ": Parent = " << dbs.m_parents[i] << endl;
-		}
-
 		stop = omp_get_wtime();
 		free(nlocks);
 		cout << "Merging took " << stop - start << " seconds."<< endl;
+		cout << "Parallel DBS"<< endl;
 
 		for(tid = 0; tid < maxthreads; tid++)
 			merge[tid].clear();

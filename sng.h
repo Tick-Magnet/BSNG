@@ -6,6 +6,7 @@
 #include "clusters.h"
 #include <queue>
 #include <random>
+#include <algorithm>
 
 namespace NWUClustering
 {

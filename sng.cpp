@@ -130,7 +130,7 @@ namespace NWUClustering
 			// Skip if i is not a root
    		}
 
-        o << "- - - Sequential SNG Clustering Output - - -" << endl;
+        o << "- - - Parallel SNG Clustering Output - - -" << endl;
         o << "Key: 0 = Noise | -1 = Unclustered | > 0 = Cluster ID" << endl;
         o << " " << endl;
         o << "ID" << " | " << "Cluster" << endl; 
@@ -186,7 +186,7 @@ namespace NWUClustering
                         //Checks if point hasn't been selected previously.
                         if (std::find(sng.selected_seeds.begin(), sng.selected_seeds.end(), random_index) == sng.selected_seeds.end()) {
                             sng.selected_seeds.push_back(random_index);
-                            cout << random_index << " "; 
+                            //cout << random_index << " "; 
                         }
                     }
 
@@ -309,7 +309,7 @@ void run_sng_algo_uf(ClusteringAlgo& sng) {
     // Add two numbers to the selected_seeds vector
     sng.selected_seeds.reserve(sng.m_seeds);
     sng.selected_seeds.push_back(9);
-    sng.selected_seeds.push_back(11);
+    //sng.selected_seeds.push_back(14);
 
     int thread_id, i, j, k, neighbor_point_id, point_id, root, root1, root2;
     int max_threads = omp_get_max_threads();
@@ -369,7 +369,11 @@ void run_sng_algo_uf(ClusteringAlgo& sng) {
         #pragma omp critical
         {
             cout << "Thread " << thread_id << " processes seeds from " << start_seed << " to " << end_seed - 1 << endl;
-            cout << "Size of prID vector: " << prID.size() << endl;
+            
+            for (int seed_index = start_seed; seed_index < end_seed; ++seed_index) {
+                cout << sng.selected_seeds[seed_index] << " ";
+            }
+            cout << endl;
         }
 
 
@@ -392,6 +396,7 @@ void run_sng_algo_uf(ClusteringAlgo& sng) {
                 cout << endl;
             }
 			
+
             //Select Front of Queue
 			int currentPoint = pointQueue.front();
             pointQueue.pop();
@@ -407,61 +412,79 @@ void run_sng_algo_uf(ClusteringAlgo& sng) {
 
 				sng.m_corepoint[currentPoint] = 1;
 				sng.m_member[currentPoint] = 1;
-                // Get the root containing currentPoint
-                root = currentPoint;
-            
-
+                
                 //TODO: Sort Neighbor points by highest.
+                std::sort(neighbors.begin(), neighbors.end(), [](const kdtree2_result& a, const kdtree2_result& b) {
+                    return a.idx > b.idx;
+                });
+
 
                 for (j = 0; j < neighbors.size(); j++) {
                     
 					neighbor_point_id = neighbors[j].idx;
-
+                    
                     //cout << "Requesting to Merge | Neighborhood Point Thread ID: " << prID[neighbor_point_id] << " | Current Point Thread ID: " << prID[neighbor_point_id] << endl;
                     //If point Thread ID isn't in this thread THEN threads should merge.
-					if(prID[neighbor_point_id] != -1 &&  prID[neighbor_point_id] != prID[currentPoint]) {
+					
+                    if(prID[neighbor_point_id] != -1 &&  prID[neighbor_point_id] != prID[currentPoint]) {
 						
-                        //cout << "Requesting to Merge | Neighborhood Point Thread ID: " << prID[neighbor_point_id] << " | Current Point Thread ID: " << prID[currentPoint] << endl;
-                        //cout << "Neighborhood Point: " << neighbor_point_id << " | Current Point: " << currentPoint << endl;
+                        cout << "Merging = point: " << currentPoint << " | neighbor: " << neighbor_point_id << endl;
                         merge[thread_id].push_back(neighbor_point_id);
                         merge[thread_id].push_back(currentPoint);
-                        continue; 
+                        continue;        
 				    }
 
+                    // Get the root containing currentPoint
+                    root = currentPoint;
                     root1 = neighbor_point_id;
                     root2 = root;
+
+                    cout << "||| Neighbor: " << neighbor_point_id << " point: " << currentPoint << " | neighbor root: " << sng.m_parents[root1]  << " | point root: " << sng.m_parents[root2] << endl;
 
                     //cout << "In Neighborhood " << neighbor_point_id  << " membership: " <<sng.m_member[neighbor_point_id] << " | Current Point: " <<  currentPoint <<" | Thread ID: " << thread_id << endl;
 
                     if (sng.m_member[neighbor_point_id] == 0) {
                         
                         sng.m_member[neighbor_point_id] = 1;
+                    }
 
+                    
                         // Union-Find algorithm to merge the trees
                         while (sng.m_parents[root1] != sng.m_parents[root2]) {
-                            if (sng.m_parents[root1] < sng.m_parents[root2]) {
+                            cout << "Roots are not Equal!" << endl;
+                            if (sng.m_parents[root1] < sng.m_parents[root2]) //If Neighbor is less than Current Point
+                            {
+                                cout << "Less Than | neighbor: " << neighbor_point_id  << " | point: " << currentPoint << " | neighbor root: " << sng.m_parents[root1]  << " | point root: " << sng.m_parents[root2] << endl; ;
                                 if (sng.m_parents[root1] == root1) {
                                     sng.m_parents[root1] = sng.m_parents[root2];
                                     root = sng.m_parents[root2];
+                                    cout << "MergingRoots | neighbor root: " << sng.m_parents[root1]  << " | point root: " << sng.m_parents[root2] << endl; 
                                     break;
                                 }
                                 // Splicing
                                 int temp = sng.m_parents[root1];
                                 sng.m_parents[root1] = sng.m_parents[root2];
                                 root1 = temp;
-                            } else {
+                                cout << "Splicing" << endl;
+
+                            } 
+                            else //If Neighbor is greater than Current Point
+                            {
+                                cout << "Greater Than | neighbor: " << neighbor_point_id  << " | point: " << currentPoint << " | neighbor root: " << sng.m_parents[root1]  << " | point root: " << sng.m_parents[root2] << endl; ;
                                 if (sng.m_parents[root2] == root2) {
                                     sng.m_parents[root2] = sng.m_parents[root1];
                                     root = sng.m_parents[root1];
+                                    cout << "MergingRoots | neighbor: " << sng.m_parents[root1]  << " | point: " << sng.m_parents[root2] << endl; 
                                     break;
                                 }
                                 // Splicing
                                 int temp = sng.m_parents[root2];
                                 sng.m_parents[root2] = sng.m_parents[root1];
                                 root2 = temp;
+                                cout << "Splicing" << endl;
                             }
                         }
-                    }	
+                    
 					
                     //If the neighbor hasn't been searched and it's the same point, add it to the queue.
 					//cout << "Checking if " << neighbor_point_id << ": should be added to queue" << endl;
@@ -474,6 +497,11 @@ void run_sng_algo_uf(ClusteringAlgo& sng) {
             } 
         }
     }
+
+    for (int i = 0; i < sng.m_pts->m_i_num_points; ++i) {
+		cout << "Point " << i << ": Parent = " << sng.m_parents[i] << endl;
+	} cout << endl;
+
 
     // Continue with merging clusters using locks
     int vertex1, vertex2, merge_size;
@@ -493,7 +521,7 @@ void run_sng_algo_uf(ClusteringAlgo& sng) {
     #pragma omp parallel for shared(max_threads, merge, node_locks) private(i, vertex1, vertex2, root1, root2, merge_size, thread_id)
     for (thread_id = 0; thread_id < max_threads; thread_id++) {
         merge_size = merge[thread_id].size() / 2;
-        cout << merge_size << endl;
+
         for (i = 0; i < merge_size; i++) {
             vertex1 = merge[thread_id][2 * i];
             vertex2 = merge[thread_id][2 * i + 1];
@@ -510,14 +538,10 @@ void run_sng_algo_uf(ClusteringAlgo& sng) {
             }
 
             if (should_merge == 1) {
-                //cout << endl;
-                //cout << "SHOULD_MERGE!" << endl;
+
                 // Union-Find based approach for merging
                 root1 = vertex1;
                 root2 = vertex2;
-
-                //cout << "Root1: " << root1 << endl;
-                //cout << "Root2: " << root2 << endl;
 
                 // Union-Find algorithm with splicing compression techniques
                 while (sng.m_parents[root1] != sng.m_parents[root2]) {
@@ -557,17 +581,13 @@ void run_sng_algo_uf(ClusteringAlgo& sng) {
                         root2 = temp;
                     }
                 }
-                //cout << "Root1: " << root1 << endl;
-                //cout << "Root2: " << root2 << endl;
             }
         }
     }
 
     for (int i = 0; i < sng.m_pts->m_i_num_points; ++i) {
 		cout << "Point " << i << ": Parent = " << sng.m_parents[i] << endl;
-	}
-
-
+	} cout << endl;
 
     stop_time = omp_get_wtime();
     free(node_locks);
@@ -615,7 +635,7 @@ void run_sng_algo(ClusteringAlgo& sng) {
 	for (int i = 0; i < sng.m_seeds; i++) {
        	
         int pid = sng.selected_seeds[i];
-        cout << "pid: " << pid << endl;
+        //cout << "pid: " << pid << endl;
 		
         if (!sng.m_visited[pid]) {
 			sng.m_visited[pid] = true;
