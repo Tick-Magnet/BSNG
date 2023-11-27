@@ -20,7 +20,7 @@ namespace NWUClustering
 		virtual ~ClusteringAlgo();
 
 		//Set parameters for the S&G Algorithm
-		void set_sng_params(double eps, int minPts, int seeds);
+		void set_sng_params(double eps, int minPts, int seeds, int seedMethod);
 
 		//Random Seed Selection Algorithm
 		void seed_selection(ostream& o);
@@ -37,6 +37,7 @@ namespace NWUClustering
 		double 	m_epsSquare;
 		int 	m_minPts;
 		int 	m_seeds;
+		int     m_seedMethod;
   
 		// Noise vector to mark noise points
         vector<bool> m_noise;

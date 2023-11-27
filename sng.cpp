@@ -4,10 +4,11 @@
 namespace NWUClustering
 {
 	// Set SNG algorithm parameters
-    void ClusteringAlgo::set_sng_params(double eps, int minPts, int seeds) {
+    void ClusteringAlgo::set_sng_params(double eps, int minPts, int seeds, int seedMethod) {
 		m_epsSquare =  eps * eps;
 		m_minPts =  minPts;
 		m_seeds = seeds;
+        m_seedMethod = seedMethod;
 	}
 
 	// Destructor to clean up resources
@@ -87,8 +88,6 @@ namespace NWUClustering
 		vector <int> clusters;
 		clusters.resize(m_pts->m_i_num_points, 0);
 
-		
-
 		int i, j, sum_points = 0, noise = 0, root, rootcount = 0, tmp;
 
 		// Calculate cluster information
@@ -158,41 +157,146 @@ namespace NWUClustering
         
         cout << endl;
         cout << "Seed Selection | # of Seeds: " << sng.m_seeds << endl;
+        cout << "Seed Method: " << sng.m_seedMethod << endl;
         //TODO: Add other Seed Selection Methodologies 
-        //Switch 
-        //Random 
         //Sections (X-Y) | 1st Fourth
-        //Odds & Evens 
- 
 
-        //Random Point Seed Selection - m_seeds random points
-        cout << "Random Seed Selection" << endl;
-        sng.selected_seeds.reserve(sng.m_seeds);
+        switch (sng.m_seedMethod) {
 
-        // Check if there are more points than seeds
-        if (sng.m_seeds >= sng.m_pts->m_i_num_points) {
-            cout << "Error: Number of seeds is greater than or equal to the number of points. Aborting." << endl;
-            exit(-1);
+            case 0: //Random Seed Selection - m_seeds random points
+                {
+                    cout << "Random Seed Selection" << endl;
+                    sng.selected_seeds.reserve(sng.m_seeds);
+
+                    // Check if there are more points than seeds
+                    if (sng.m_seeds >= sng.m_pts->m_i_num_points) {
+                        cout << "Error: Number of seeds is greater than or equal to the number of points. Aborting." << endl;
+                        exit(-1);
+                    }
+
+                    std::random_device rd;
+                    std::mt19937 gen(rd());
+                    std::uniform_int_distribution<int> dis(0, sng.m_pts->m_i_num_points - 1);
+
+                    cout << "Selected random point(s): "; 
+
+                    while (sng.selected_seeds.size() < sng.m_seeds) {
+                        int random_index = dis(gen);
+
+                        //Checks if point hasn't been selected previously.
+                        if (std::find(sng.selected_seeds.begin(), sng.selected_seeds.end(), random_index) == sng.selected_seeds.end()) {
+                            sng.selected_seeds.push_back(random_index);
+                            cout << random_index << " "; 
+                        }
+                    }
+
+                    cout << endl; // Print a newline to end seed list
+                    cout << endl;
+                    break;
+                }
+            case 1: 
+                {
+                    cout << "Odd Seed Selection" << endl;
+                    int half = sng.m_pts->m_i_num_points / 2;
+                    sng.selected_seeds.reserve(half);
+
+                    // Use a fixed sequence starting from 1 as the seed
+                    std::vector<int> seed_sequence(sng.m_pts->m_i_num_points);
+                    std::iota(seed_sequence.begin(), seed_sequence.end(), 1); // Fills the sequence with 1, 2, 3, ..., n
+
+                    // Select every odd number as a seed
+                    for (int i = 0; i < half; ++i) {
+                        int odd_seed = seed_sequence[i * 2]; // Select every odd index
+                        sng.selected_seeds.push_back(odd_seed);
+                        cout << odd_seed << " ";
+                    }
+
+                    sng.m_seeds = half; //This is so that sequential the system will loop through all seeds.
+
+                    cout << endl; // Print a newline to end seed list
+                    cout << endl;
+                    break;
+                }
+            case 2: 
+                {
+                    cout << "Even Seed Selection" << endl;
+                    int half = sng.m_pts->m_i_num_points / 2;
+                    sng.selected_seeds.reserve(half);
+
+                    // Use a fixed sequence starting from 0 as the seed
+                    std::vector<int> seed_sequence(sng.m_pts->m_i_num_points);
+                    std::iota(seed_sequence.begin(), seed_sequence.end(), 0); // Fills the sequence with 0, 1, 2, ..., n-1
+
+                    // Select every even number as a seed
+                    for (int i = 0; i < half; ++i) {
+                        int even_seed = seed_sequence[i * 2]; // Select every even index
+                        if (even_seed != half * 2) { // Exclude half when it's even
+                            sng.selected_seeds.push_back(even_seed);
+                            cout << even_seed << " ";
+                        }
+                    }
+
+                    sng.m_seeds = sng.selected_seeds.size(); // Update m_seeds to the actual number of selected seeds
+
+                    cout << endl; // Print a newline to end seed list
+                    cout << endl;
+                    break;
+
+                }
+            case 3: 
+                {
+
+                    //TODO: Add Error Checking
+
+                    cout << "Lower Partition Seed Selection" << endl;
+                    int num = sng.m_seeds;
+                    sng.selected_seeds.reserve(num);
+
+                    // Use a fixed sequence starting from 0 as the seed
+                    std::vector<int> seed_sequence(sng.m_pts->m_i_num_points);
+                    std::iota(seed_sequence.begin(), seed_sequence.end(), 0); // Fills the sequence with 0, 1, 2, ..., n-1
+
+                    // Add every point below sng.m_seeds to sng.selected_seeds
+                    for (int i = 0; i < sng.m_seeds; ++i) {
+                        sng.selected_seeds.push_back(seed_sequence[i]); 
+                        cout << seed_sequence[i] << " ";
+                    }
+
+                    sng.m_seeds = sng.selected_seeds.size(); // Update m_seeds to the actual number of selected seeds
+                    cout << endl; // Print a newline to end seed list
+                    cout << endl;
+                    break;
+                }
+            case 4: 
+                {
+
+                    //TODO: Add Error Checking
+
+                    cout << "Upper Partition Seed Selection" << endl;
+                    int num = sng.m_pts->m_i_num_points - sng.m_seeds;
+                    sng.selected_seeds.reserve(num);
+
+                    // Use a fixed sequence starting from 0 as the seed
+                    std::vector<int> seed_sequence(sng.m_pts->m_i_num_points);
+                    std::iota(seed_sequence.begin(), seed_sequence.end(), 0); // Fills the sequence with 0, 1, 2, ..., n-1
+
+                    // Add every point below sng.m_seeds to sng.selected_seeds
+                    for (int i = sng.m_pts->m_i_num_points -1; i >= sng.m_seeds; --i) {
+                        sng.selected_seeds.push_back(seed_sequence[i]); 
+                        cout << seed_sequence[i] << " ";
+                    }
+
+                    sng.m_seeds = sng.selected_seeds.size(); // Update m_seeds to the actual number of selected seeds
+                    cout << endl; // Print a newline to end seed list
+                    cout << endl;
+                    break;
+                }
+            default: 
+                {
+                    cout << "Not a proper seed method." << endl;
+                    exit(1);
+                }
         }
-
-        std::random_device rd;
-        std::mt19937 gen(rd());
-        std::uniform_int_distribution<int> dis(0, sng.m_pts->m_i_num_points - 1);
-
-        //cout << "Selected random point(s): "; 
-
-        while (sng.selected_seeds.size() < sng.m_seeds) {
-            int random_index = dis(gen);
-
-            //Checks if point hasn't been selected previously.
-            if (std::find(sng.selected_seeds.begin(), sng.selected_seeds.end(), random_index) == sng.selected_seeds.end()) {
-                sng.selected_seeds.push_back(random_index);
-                //cout << random_index << " "; 
-            }
-        }
-
-        cout << endl; // Print a newline to end seed list
-        cout << endl;
     }
 
 
@@ -205,9 +309,7 @@ void run_sng_algo_uf(ClusteringAlgo& sng) {
     // Add two numbers to the selected_seeds vector
     sng.selected_seeds.reserve(sng.m_seeds);
     sng.selected_seeds.push_back(9);
-    sng.selected_seeds.push_back(0);
-    sng.selected_seeds.push_back(6);
-    sng.selected_seeds.push_back(4);
+    sng.selected_seeds.push_back(11);
 
     int thread_id, i, j, k, neighbor_point_id, point_id, root, root1, root2;
     int max_threads = omp_get_max_threads();
@@ -511,9 +613,11 @@ void run_sng_algo(ClusteringAlgo& sng) {
 
 	// Iterate through points
 	for (int i = 0; i < sng.m_seeds; i++) {
-       	int pid = sng.selected_seeds[i];
-
-		if (!sng.m_visited[pid]) {
+       	
+        int pid = sng.selected_seeds[i];
+        cout << "pid: " << pid << endl;
+		
+        if (!sng.m_visited[pid]) {
 			sng.m_visited[pid] = true;
 			ne.clear();
 			sng.m_kdtree->r_nearest_around_point(pid, 0, sng.m_epsSquare, ne);

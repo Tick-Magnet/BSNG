@@ -28,7 +28,7 @@ static void usage(char* argv0) {
 
 int main(int argc, char** argv) {
     double seconds, eps;
-    int minPts, threads, opt, seeds;
+    int minPts, threads, opt, seeds, method;
     char* outfilename = NULL;
     char* infilename = NULL;
     bool classical, isBinaryFile, dbscan;
@@ -39,13 +39,14 @@ int main(int argc, char** argv) {
     isBinaryFile = 0;
     outfilename = NULL;
     infilename = NULL;
-    threads = -1;
-    seeds = -1;
+    threads = 1;
+    seeds = 1;
+    method = 0;
     classical = false;
     isBinaryFile = false;
     dbscan = false;
 
-    while ((opt = getopt(argc, argv, "i:t:p:m:e:s:o:v:z:bdxghncul")) != EOF) {
+    while ((opt = getopt(argc, argv, "i:t:p:m:e:s:o:v:s:z:bdxghncul")) != EOF) {
         switch (opt) {
             case 'i':
                 infilename = optarg;
@@ -61,6 +62,9 @@ int main(int argc, char** argv) {
                 break;
             case 's':
                 seeds = atoi(optarg);
+                break;
+            case 'z':
+                method = atoi(optarg);
                 break;
             case 'o':
                 outfilename = optarg;
@@ -82,7 +86,7 @@ int main(int argc, char** argv) {
                 break;
         }
 
-        //printf("opt: %c, optarg: %s\n", opt, optarg); //Debugging for Arguments
+        printf("opt: %c, optarg: %s\n", opt, optarg); //Debugging for Arguments
     }
 
     if (dbscan == false) //By Default Run SNG
@@ -92,7 +96,7 @@ int main(int argc, char** argv) {
         cout << endl;
 
         // Check if required options are provided
-        if (infilename == NULL || minPts < 0 || seeds < 0 || eps < 0 || threads < 1) {
+        if (infilename == NULL || minPts < 0 || seeds < 0 || eps < 0 || threads < 0) {
             usage(argv[0]);
             exit(-1);
         }
@@ -102,7 +106,7 @@ int main(int argc, char** argv) {
 
         // Create an instance of the ClusteringAlgo class
         NWUClustering::ClusteringAlgo sng;
-        sng.set_sng_params(eps, minPts, seeds);
+        sng.set_sng_params(eps, minPts, seeds, method);
 
         cout << "Input parameters " << " minPts " << minPts << " eps " << eps << " seeds " << seeds << endl;
 
