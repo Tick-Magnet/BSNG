@@ -8,17 +8,23 @@ static void usage(char* argv0) {
     const char* params =
     "\n"
     "Usage: %s [switches] -i filename -b -m minpts -e epsilon -t threads -s seeds -o output \n"
-	"Example: ./bsng -i random_points.bin -b -m 3 -e 5 -s 2 -t 8 -o output\n"
+	"Example: ./bsng -i random_points.bin -b -m 3 -e 5 -s 2 -t 2 -o output\n"
         "\n"
         "    -i filename     : file containing input data to be clustered\n"
+        "    -d dbscan       : run dbscan instead of sow-and-grow (default no)\n"
         "    -b isBinary     : input file is in binary format (default no)\n"
-        "    -m minpts       : input parameter of BSNG, min points to form a cluster, e.g. 2\n"
-        "    -e epsilon      : input parameter of BSNG, radius or threshold on neighborhoods retrieved, e.g. 0.8\n"
-        "    -s seeds        : input parameter of Sow-n-Grow, number of seeds to be chosen from each partition of data\n"
-        "    -o output       : clustering results, format, (each line, point id, clusterid)\n"
-        "    -t threads      : number of threads to be employed\n"
-        "    -c classical    : sequential or parallel clustering (default parallel)\n"
-        "    -d dbscan       : run a classical dbscan instead of sow-and-grow\n"
+        "    -m minpts       : input parameter of BSNG, min points to form a cluster, e.g. 3\n"
+        "    -e epsilon      : input parameter of BSNG, radius of neighborhood, e.g. 5\n"
+        "    -s seeds        : input parameter of BSNG, input seed(s) (default 1)\n"
+        "    -t threads      : number of threads to be employed (default 1)\n"      
+        "    -o output       : clustering results output file - format (point id, clusterid)\n"
+        "    -z seedMethod   : select method for seed selection (default 0)\n"
+        "       * 0 random   : random seed values\n"
+        "       * 1 even     : even seed values\n"
+        "       * 2 odd      : odd seed values\n"
+        "       * 3 Lower    : all under input seed\n"
+        "       * 4 Upper    : all over input seed\n"
+  
     "\n";
 
     fprintf(stderr, params, argv0);
@@ -86,20 +92,21 @@ int main(int argc, char** argv) {
                 break;
         }
 
-        printf("opt: %c, optarg: %s\n", opt, optarg); //Debugging for Arguments
+        //printf("opt: %c, optarg: %s\n", opt, optarg); //Debugging for Arguments
     }
 
     if (dbscan == false) //By Default Run SNG
     {
-        cout << endl;
-        cout << "   || SOW & GROW ||    " << endl;
-        cout << endl;
 
         // Check if required options are provided
         if (infilename == NULL || minPts < 0 || seeds < 0 || eps < 0 || threads < 0) {
             usage(argv[0]);
             exit(-1);
         }
+        
+        cout << endl;
+        cout << "   || SOW & GROW ||    " << endl;
+        cout << endl;
 
         // Set the number of OpenMP threads
         omp_set_num_threads(threads);
@@ -158,15 +165,16 @@ int main(int argc, char** argv) {
         }
 
     } else {
-        cout << endl;
-        cout << "   || DBSCAN ||    " << endl;
-        cout << endl;
 
         // Check if required options are provided
         if (infilename == NULL || minPts < 0 || eps < 0 || threads < 1) {
             usage(argv[0]);
             exit(-1);
         }
+
+        cout << endl;
+        cout << "   || DBSCAN ||    " << endl;
+        cout << endl;
 
         // Set the number of OpenMP threads
         omp_set_num_threads(threads);
@@ -202,9 +210,11 @@ int main(int argc, char** argv) {
         cout << endl; 
         if (classical == true) {
             cout << "- DBSCAN SEQUENTIAL ALGORITHM -" << endl;
+            cout << endl;
             run_dbs_algo(dbs); // Sequential 
         } else {
             cout << "- DBSCAN Parallel ALGORITHM -" << endl;
+            cout << endl;
             run_dbs_algo_uf(dbs); // Parallel
         }
             

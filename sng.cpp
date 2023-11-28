@@ -116,7 +116,7 @@ namespace NWUClustering
 		int count = 0;
 		// Process cluster information
 		for (i = 0; i < m_pts->m_i_num_points; i++) {
-			
+            
 			if (clusters[i] == 1) {
 				// Vertex i is noise
 				clusters[i] = 0;
@@ -131,13 +131,18 @@ namespace NWUClustering
    		}
 
         o << "- - - Parallel SNG Clustering Output - - -" << endl;
-        o << "Key: 0 = Noise | -1 = Unclustered | > 0 = Cluster ID" << endl;
+        o << "Key: 0 = Noise | > 0 = Cluster ID" << endl;
         o << " " << endl;
         o << "ID" << " | " << "Cluster" << endl; 
-        
+
 		// Write point id and cluster ids to the output stream
 		for (i = 0; i < m_pts->m_i_num_points; i++) {
-			o << i << " | " << clusters[m_parents[i]] << endl;
+            //Formatting for Output
+            if (i < 10){
+                o << i << "  | " << clusters[m_parents[i]] << endl;
+            } else {
+                o << i << " | " << clusters[m_parents[i]] << endl;
+            }
 		}
         
 		// Output summary information
@@ -156,8 +161,10 @@ namespace NWUClustering
     void seed_selection(ClusteringAlgo& sng) {
         
         cout << endl;
-        cout << "Seed Selection | # of Seeds: " << sng.m_seeds << endl;
-        cout << "Seed Method: " << sng.m_seedMethod << endl;
+        cout << "Starting Seed Selection" << endl;
+        cout << "Seed Method: " << sng.m_seedMethod << " | ";
+	    double start = omp_get_wtime() ;	
+
         //TODO: Add other Seed Selection Methodologies 
         //Sections (X-Y) | 1st Fourth
 
@@ -186,12 +193,11 @@ namespace NWUClustering
                         //Checks if point hasn't been selected previously.
                         if (std::find(sng.selected_seeds.begin(), sng.selected_seeds.end(), random_index) == sng.selected_seeds.end()) {
                             sng.selected_seeds.push_back(random_index);
-                            //cout << random_index << " "; 
+                            cout << random_index << " "; 
                         }
                     }
 
-                    cout << endl; // Print a newline to end seed list
-                    cout << endl;
+                    //cout << endl; // Print a newline to end seed list
                     break;
                 }
             case 1: 
@@ -293,10 +299,19 @@ namespace NWUClustering
                 }
             default: 
                 {
-                    cout << "Not a proper seed method." << endl;
+                    cout << "    -z seedMethod   : select method for seed selection (default 0)\n"
+                            "       * 0 random   : random seed values\n"
+                            "       * 1 even     : even seed values\n"
+                            "       * 2 odd      : odd seed values\n"
+                            "       * 3 Lower    : all under input seed\n"
+                            "       * 4 Upper    : all over input seed\n" << endl;
                     exit(1);
                 }
         }
+
+        double stop = omp_get_wtime();
+        cout << "Seed Selection took " << stop - start << " seconds." << endl;
+        cout << endl;
     }
 
 
@@ -304,11 +319,11 @@ namespace NWUClustering
 void run_sng_algo_uf(ClusteringAlgo& sng) {	
    
     //Select Seeds for Algorithm
-	//seed_selection(sng);
+    seed_selection(sng);
 
     // Add two numbers to the selected_seeds vector
-    sng.selected_seeds.reserve(sng.m_seeds);
-    sng.selected_seeds.push_back(9);
+    //sng.selected_seeds.reserve(sng.m_seeds);
+    //sng.selected_seeds.push_back(9);
     //sng.selected_seeds.push_back(14);
 
     int thread_id, i, j, k, neighbor_point_id, point_id, root, root1, root2;
@@ -366,7 +381,7 @@ void run_sng_algo_uf(ClusteringAlgo& sng) {
         int start_seed = thread_id * seeds_per_thread;
         int end_seed = (thread_id == max_threads - 1) ? sng.m_seeds : start_seed + seeds_per_thread;
 
-        #pragma omp critical
+        /*        #pragma omp critical
         {
             cout << "Thread " << thread_id << " processes seeds from " << start_seed << " to " << end_seed - 1 << endl;
             
@@ -375,6 +390,7 @@ void run_sng_algo_uf(ClusteringAlgo& sng) {
             }
             cout << endl;
         }
+        */
 
 
         for (int seed_idx = start_seed; seed_idx < end_seed; ++seed_idx) {
@@ -383,7 +399,7 @@ void run_sng_algo_uf(ClusteringAlgo& sng) {
 
         while (!pointQueue.empty()) {
 
-            
+            /*
             #pragma omp critical
             {
                 // Debugging code to print the contents of the queue
@@ -395,7 +411,7 @@ void run_sng_algo_uf(ClusteringAlgo& sng) {
                 }
                 cout << endl;
             }
-			
+			*/
 
             //Select Front of Queue
 			int currentPoint = pointQueue.front();
@@ -428,7 +444,7 @@ void run_sng_algo_uf(ClusteringAlgo& sng) {
 					
                     if(prID[neighbor_point_id] != -1 &&  prID[neighbor_point_id] != prID[currentPoint]) {
 						
-                        cout << "Merging = point: " << currentPoint << " | neighbor: " << neighbor_point_id << endl;
+                        //cout << "Merging = point: " << currentPoint << " | neighbor: " << neighbor_point_id << endl;
                         merge[thread_id].push_back(neighbor_point_id);
                         merge[thread_id].push_back(currentPoint);
                         continue;        
@@ -439,7 +455,7 @@ void run_sng_algo_uf(ClusteringAlgo& sng) {
                     root1 = neighbor_point_id;
                     root2 = root;
 
-                    cout << "||| Neighbor: " << neighbor_point_id << " point: " << currentPoint << " | neighbor root: " << sng.m_parents[root1]  << " | point root: " << sng.m_parents[root2] << endl;
+                    //cout << "||| Neighbor: " << neighbor_point_id << " point: " << currentPoint << " | neighbor root: " << sng.m_parents[root1]  << " | point root: " << sng.m_parents[root2] << endl;
 
                     //cout << "In Neighborhood " << neighbor_point_id  << " membership: " <<sng.m_member[neighbor_point_id] << " | Current Point: " <<  currentPoint <<" | Thread ID: " << thread_id << endl;
 
@@ -451,37 +467,37 @@ void run_sng_algo_uf(ClusteringAlgo& sng) {
                     
                         // Union-Find algorithm to merge the trees
                         while (sng.m_parents[root1] != sng.m_parents[root2]) {
-                            cout << "Roots are not Equal!" << endl;
+                            //cout << "Roots are not Equal!" << endl;
                             if (sng.m_parents[root1] < sng.m_parents[root2]) //If Neighbor is less than Current Point
                             {
-                                cout << "Less Than | neighbor: " << neighbor_point_id  << " | point: " << currentPoint << " | neighbor root: " << sng.m_parents[root1]  << " | point root: " << sng.m_parents[root2] << endl; ;
+                                //cout << "Less Than | neighbor: " << neighbor_point_id  << " | point: " << currentPoint << " | neighbor root: " << sng.m_parents[root1]  << " | point root: " << sng.m_parents[root2] << endl; ;
                                 if (sng.m_parents[root1] == root1) {
                                     sng.m_parents[root1] = sng.m_parents[root2];
                                     root = sng.m_parents[root2];
-                                    cout << "MergingRoots | neighbor root: " << sng.m_parents[root1]  << " | point root: " << sng.m_parents[root2] << endl; 
+                                    //cout << "MergingRoots | neighbor root: " << sng.m_parents[root1]  << " | point root: " << sng.m_parents[root2] << endl; 
                                     break;
                                 }
                                 // Splicing
                                 int temp = sng.m_parents[root1];
                                 sng.m_parents[root1] = sng.m_parents[root2];
                                 root1 = temp;
-                                cout << "Splicing" << endl;
+                                //cout << "Splicing" << endl;
 
                             } 
                             else //If Neighbor is greater than Current Point
                             {
-                                cout << "Greater Than | neighbor: " << neighbor_point_id  << " | point: " << currentPoint << " | neighbor root: " << sng.m_parents[root1]  << " | point root: " << sng.m_parents[root2] << endl; ;
+                                //cout << "Greater Than | neighbor: " << neighbor_point_id  << " | point: " << currentPoint << " | neighbor root: " << sng.m_parents[root1]  << " | point root: " << sng.m_parents[root2] << endl; ;
                                 if (sng.m_parents[root2] == root2) {
                                     sng.m_parents[root2] = sng.m_parents[root1];
                                     root = sng.m_parents[root1];
-                                    cout << "MergingRoots | neighbor: " << sng.m_parents[root1]  << " | point: " << sng.m_parents[root2] << endl; 
+                                    //cout << "MergingRoots | neighbor: " << sng.m_parents[root1]  << " | point: " << sng.m_parents[root2] << endl; 
                                     break;
                                 }
                                 // Splicing
                                 int temp = sng.m_parents[root2];
                                 sng.m_parents[root2] = sng.m_parents[root1];
                                 root2 = temp;
-                                cout << "Splicing" << endl;
+                                //cout << "Splicing" << endl;
                             }
                         }
                     
@@ -498,10 +514,11 @@ void run_sng_algo_uf(ClusteringAlgo& sng) {
         }
     }
 
+    /*
     for (int i = 0; i < sng.m_pts->m_i_num_points; ++i) {
 		cout << "Point " << i << ": Parent = " << sng.m_parents[i] << endl;
 	} cout << endl;
-
+    */
 
     // Continue with merging clusters using locks
     int vertex1, vertex2, merge_size;
@@ -585,9 +602,11 @@ void run_sng_algo_uf(ClusteringAlgo& sng) {
         }
     }
 
+    /*
     for (int i = 0; i < sng.m_pts->m_i_num_points; ++i) {
 		cout << "Point " << i << ": Parent = " << sng.m_parents[i] << endl;
 	} cout << endl;
+    */
 
     stop_time = omp_get_wtime();
     free(node_locks);
@@ -628,7 +647,7 @@ void run_sng_algo(ClusteringAlgo& sng) {
 
 	vector<int>* ind = sng.m_kdtree->getIndex();
 
-    cout << "Start" << endl;
+    cout << "Begin Sequential Sow & Grow (SSNG)" << endl;
 	double start = omp_get_wtime() ;		
 
 	// Iterate through points

@@ -362,6 +362,7 @@ namespace NWUClustering
 		dbs.m_clusters.clear();
 
 		cout << "DBS SEQUENTIAL ALGORITHM" << endl;
+		cout << endl;
 
 		kdtree2_result_vector ne;
 		kdtree2_result_vector ne2;
