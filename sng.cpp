@@ -176,7 +176,7 @@ namespace NWUClustering
                     sng.selected_seeds.reserve(sng.m_seeds);
 
                     // Check if there are more points than seeds
-                    if (sng.m_seeds >= sng.m_pts->m_i_num_points) {
+                    if (sng.m_seeds > sng.m_pts->m_i_num_points) {
                         cout << "Error: Number of seeds is greater than or equal to the number of points. Aborting." << endl;
                         exit(-1);
                     }

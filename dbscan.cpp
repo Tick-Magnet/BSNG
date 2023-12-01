@@ -115,7 +115,11 @@ namespace NWUClustering
 
 		// Write point id and cluster ids to the output stream
 		for (i = 0; i < m_pts->m_i_num_points; i++) {
+			if (clusters[m_parents[i]] == 1) {
+				o << i << " | " << clusters[m_parents[i]] << " *** " << endl;
+			} else {
 			o << i << " | " << clusters[m_parents[i]] << endl;
+			}
 		}
 
 		// Output summary information
@@ -361,8 +365,7 @@ namespace NWUClustering
 		dbs.m_pid_to_cid.resize(dbs.m_pts->m_i_num_points, 0);
 		dbs.m_clusters.clear();
 
-		cout << "DBS SEQUENTIAL ALGORITHM" << endl;
-		cout << endl;
+	
 
 		kdtree2_result_vector ne;
 		kdtree2_result_vector ne2;
