@@ -91,7 +91,7 @@ namespace NWUClustering {
 				dims = 0;
 				while(ss >> buf) // get the corordinate of the points
 					dims++;
-
+cout << "DIMS: " << dims;
 				// Count the number of points
 				num_points = 0;
                 while (!file.eof()) {

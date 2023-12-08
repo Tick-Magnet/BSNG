@@ -53,6 +53,15 @@ namespace NWUClustering
             } else {
                 o << i << " | " << id << endl;
             }
+//--------------------CHANGE FOR DATA OUTPUT------------------------            
+            o << " Value: (";
+			//Outputing datapoint 
+			for(int j = 0; j < m_pts->m_i_dims; j++)
+			{
+				o << m_pts->m_points[i][j] << ", ";
+			}
+			o << ")" << endl;
+//--------------------END CHANGE FOR DATA OUTPUT--------------------			
 		}
 
 		for(i = 0; i < m_clusters.size(); i++) {
@@ -140,8 +149,26 @@ namespace NWUClustering
             //Formatting for Output
             if (i < 10){
                 o << i << "  | " << clusters[m_parents[i]] << endl;
+                o << " Value: (";
+//---------------------DATA OUPUT CHANGE----------------------                
+				//Outputing datapoint 
+				for(int j = 0; j < m_pts->m_i_dims; j++)
+				{
+					o << m_pts->m_points[i][j] << ", ";
+				}
+				o << ")" << endl;
+//-----------------------------------------------------------------
             } else {
                 o << i << " | " << clusters[m_parents[i]] << endl;
+                o << " Value: (";
+//----------------------DATA OUTPUT CHANGE----------------------
+				//Outputing datapoint 
+				for(int j = 0; j < m_pts->m_i_dims; j++)
+				{
+					o << m_pts->m_points[i][j] << ", ";
+				}
+				o << ")" << endl;
+//------------------------------------------------------------------
             }
 		}
         
