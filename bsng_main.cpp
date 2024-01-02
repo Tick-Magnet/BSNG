@@ -2,6 +2,7 @@
 #include "dbscan.h"
 #include "utils.h"
 #include "kdtree2.hpp"
+#include "Visualization/Visualization.h"
 
 // Function to display usage information
 static void usage(char* argv0) {
@@ -24,6 +25,7 @@ static void usage(char* argv0) {
         "       * 2 odd      : odd seed values\n"
         "       * 3 Lower    : all under input seed\n"
         "       * 4 Upper    : all over input seed\n"
+        "	 -v visualization : enable visualization"
   
     "\n";
 
@@ -38,7 +40,7 @@ int main(int argc, char** argv) {
     char* outfilename = NULL;
     char* infilename = NULL;
     bool classical, isBinaryFile, dbscan;
-
+	bool visualizationEnabled;
     // Initialize default values
     minPts = -1;
     eps = -1;
@@ -51,6 +53,7 @@ int main(int argc, char** argv) {
     classical = false;
     isBinaryFile = false;
     dbscan = false;
+    visualizationEnabled = false;
 
     while ((opt = getopt(argc, argv, "i:t:p:m:e:s:o:v:s:z:bdxghncul")) != EOF) {
         switch (opt) {
@@ -84,6 +87,9 @@ int main(int argc, char** argv) {
             case 'b':
                 isBinaryFile = true;
                 break;
+            case 'v':
+				visualizationEnabled = true;
+				break;
             case '?':
                 usage(argv[0]);
                 break;
@@ -163,6 +169,10 @@ int main(int argc, char** argv) {
 
             outfile.close();
         }
+        if(visualizationEnabled)
+		{
+			displayScatterPlot2D(&sng);	
+		}
 
     } else {
 
@@ -232,8 +242,13 @@ int main(int argc, char** argv) {
 
             outfile.close();
         }
+        if(visualizationEnabled)
+		{
+			displayScatterPlot2D(&dbs);	
+		}
     }
-
+	
+	
 	
 
     return 0;
