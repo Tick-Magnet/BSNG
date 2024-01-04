@@ -7,6 +7,8 @@
 #include <queue>
 #include <random>
 
+
+
 namespace NWUClustering
 {
 	// Class representing the SNG (Sow & Grow) Focused Clustering Algorithm

@@ -1,5 +1,10 @@
 #include "dbscan.h"
 
+
+
+
+void displayScatterPlot2D(NWUClustering::ClusteringAlgoDBS * alogrithm);
+
 namespace NWUClustering
 {
 	// Set DBS algorithm parameters
@@ -58,6 +63,7 @@ namespace NWUClustering
 		cout << "Total points " << noise + sum_points << " pt_in_cls " << sum_points << " noise " << noise << endl;
 		cout << "Number of clusters: " << m_clusters.size() << endl;
 
+		displayScatterPlot2D(this);
 	}
 
 	void ClusteringAlgoDBS::writeClusters_ufDBS(ostream& o)

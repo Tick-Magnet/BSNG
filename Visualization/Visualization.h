@@ -3,6 +3,7 @@
 #include <matplot/matplot.h>
 #include <vector>
 #include "../sng.h"
+#include "../dbscan.h"
 
 void displayScatterPlot2D(NWUClustering::ClusteringAlgo * algorithm, vector<int> * clusters);
 void displayScatterPlot2D(NWUClustering::ClusteringAlgo * algorithm);

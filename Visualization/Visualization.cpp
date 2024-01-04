@@ -18,6 +18,33 @@
 				o << ")" << endl;
 				
 */
+void displayScatterPlot2D(NWUClustering::ClusteringAlgoDBS * algorithm)
+{
+	//Fill x and y vectors
+	
+	
+	vector<double> x;
+	vector<double> y;
+	vector<double> c;
+	vector<int> clusters = algorithm->m_pid_to_cid;
+	//Iterate through each point
+	for(int i = 0; i < algorithm->m_pts->m_i_num_points; i++)
+	{
+		x.push_back(algorithm->m_pts->m_points[i][2]);
+		y.push_back(algorithm->m_pts->m_points[i][3]);
+		c.push_back(clusters.at(i) * 1000);
+		//ls
+		cout << "X: " << algorithm->m_pts->m_points[i][2] << "Y: " << algorithm->m_pts->m_points[i][3] << endl;
+		//cout << clusters.at(algorithm->m_parents[i]) << endl;
+		//c.push_back(0);
+		//c.push_back(i * 20);
+	}
+	
+	auto plot = matplot::scatter(x,y,vector<double>{}, c);
+	plot->marker_face(true);
+	
+	matplot::show();
+}
 
 void displayScatterPlot2D(NWUClustering::ClusteringAlgo * algorithm, vector<int> * clusters)
 {
