@@ -1,4 +1,6 @@
 #include "Visualization.h"
+
+
 #include <random>
 /*
 // Write point id and cluster ids to the output stream
@@ -17,7 +19,7 @@
 				
 */
 
-void displayScatterPlot2D(NWUClustering::Clusters * algorithm)
+void displayScatterPlot2D(NWUClustering::ClusteringAlgo * algorithm, vector<int> * clusters)
 {
 	//Fill x and y vectors
 	
@@ -28,17 +30,50 @@ void displayScatterPlot2D(NWUClustering::Clusters * algorithm)
 	//Iterate through each point
 	for(int i = 0; i < algorithm->m_pts->m_i_num_points; i++)
 	{
-		x.push_back(algorithm->m_pts->m_points[i][1]);
-		y.push_back(algorithm->m_pts->m_points[i][2]);
-		c.push_back(algorithm->m_pts->m_points[i][0] * (1000));
+		x.push_back(algorithm->m_pts->m_points[i][2]);
+		y.push_back(algorithm->m_pts->m_points[i][3]);
+		c.push_back(clusters->at(algorithm->m_parents[i]) * 1000);
+		//ls
+		cout << "X: " << algorithm->m_pts->m_points[i][2] << "Y: " << algorithm->m_pts->m_points[i][3] << endl;
+		cout << clusters->at(algorithm->m_parents[i]) << endl;
+		//c.push_back(0);
 		//c.push_back(i * 20);
 	}
 	
-	matplot::scatter(x,y,vector<double>{}, c);
+	auto plot = matplot::scatter(x,y,vector<double>{}, c);
+	plot->marker_face(true);
+	
+	matplot::show();
+}
+void displayScatterPlot2D(NWUClustering::ClusteringAlgo * algorithm)
+{
+	//Fill x and y vectors
+	
+	
+	vector<double> x;
+	vector<double> y;
+	vector<double> c;
+	vector<int> clusters = algorithm->m_pid_to_cid;
+	//Iterate through each point
+	for(int i = 0; i < algorithm->m_pts->m_i_num_points; i++)
+	{
+		x.push_back(algorithm->m_pts->m_points[i][2]);
+		y.push_back(algorithm->m_pts->m_points[i][3]);
+		c.push_back(clusters.at(i) * 1000);
+		//ls
+		//cout << "X: " << algorithm->m_pts->m_points[i][2] << "Y: " << algorithm->m_pts->m_points[i][3] << endl;
+		//cout << clusters.at(algorithm->m_parents[i]) << endl;
+		//c.push_back(0);
+		//c.push_back(i * 20);
+	}
+	
+	auto plot = matplot::scatter(x,y,vector<double>{}, c);
+	plot->marker_face(true);
+	
 	matplot::show();
 }
 
-void displayScatterPlot3D(NWUClustering::Clusters * alogrithm)
+void displayScatterPlot3D(NWUClustering::ClusteringAlgo * alogrithm)
 {
 	
 }

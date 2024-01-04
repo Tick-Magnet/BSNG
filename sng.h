@@ -2,11 +2,14 @@
 #ifndef _SNG_
 #define _SNG_
 
+
+
 #include "utils.h"
 #include "clusters.h"
 #include <queue>
 #include <random>
 #include <algorithm>
+
 
 namespace NWUClustering
 {

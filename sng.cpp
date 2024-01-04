@@ -1,5 +1,8 @@
 #include "sng.h"
 
+void displayScatterPlot2D(NWUClustering::ClusteringAlgo * algorithm, vector<int> * clusters);
+void displayScatterPlot2D(NWUClustering::ClusteringAlgo * algorithm);
+
 
 namespace NWUClustering
 {
@@ -88,6 +91,7 @@ namespace NWUClustering
         o << endl;
         o << "Total points " << unclustered + noise + sum_points << " | pts_cls " << sum_points << " | noise " << noise << " | pts_uncls " << unclustered << endl;
         o << "Number of clusters: " << m_clusters.size() << endl;
+        displayScatterPlot2D(this);
 
 	}
 
@@ -179,7 +183,9 @@ namespace NWUClustering
 
         cout << "Total points " << noise + sum_points << " pt_in_cls " << sum_points << " noise " << noise << endl;
 		cout << "Number of clusters: " << count << endl;
-
+		
+		displayScatterPlot2D(this, &clusters);
+		
 		clusters.clear();
 	}
 

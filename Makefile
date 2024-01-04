@@ -2,16 +2,16 @@
 
 # Compiler and compilation flags
 CC = g++
-CFLAGS = -c -fopenmp -O3
+CFLAGS = -c -fopenmp -O3 -ggdb
 LDFLAGS =
-LIBS = -fopenmp -O3
+LIBS = -fopenmp -O3 -lmatplot
 
 # Project name and executable name
 PROJ = bsng
 APP = $(PROJ)
 
 # Source files, header files, and object files
-SRCS = $(wildcard *.cpp)
+SRCS = $(wildcard *.cpp) $(wildcard Visualization/*.cpp)
 HDRS = $(wildcard *.h)
 OBJS = $(SRCS:.cpp=.o)
 

@@ -171,7 +171,7 @@ int main(int argc, char** argv) {
         }
         if(visualizationEnabled)
 		{
-			displayScatterPlot2D(&sng);	
+			//displayScatterPlot2D(&sng);	
 		}
 
     } else {
@@ -244,7 +244,7 @@ int main(int argc, char** argv) {
         }
         if(visualizationEnabled)
 		{
-			displayScatterPlot2D(&dbs);	
+			//displayScatterPlot2D(&dbs);	
 		}
     }
 	
