@@ -94,6 +94,8 @@ namespace NWUClustering
 		
 		if(csvOutputFilename != NULL)
 		{
+			cout << "Writing csv file\n";
+
 			//Open csv file
 			ofstream csvFile;
             csvFile.open(csvOutputFilename);
@@ -207,6 +209,8 @@ namespace NWUClustering
 		
 		if(csvOutputFilename != NULL)
 		{
+			cout << "Writing csv file\n";
+
 			//Open csv file
 			ofstream csvFile;
             csvFile.open(csvOutputFilename);
