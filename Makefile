@@ -2,7 +2,7 @@
 
 # Compiler and compilation flags
 CC = g++
-CFLAGS = -c -fopenmp -O3 -ggdb -I
+CFLAGS = -c -fopenmp -O3 -ggdb 
 LDFLAGS =
 LIBS = -fopenmp -O3 -lmatplot
 
