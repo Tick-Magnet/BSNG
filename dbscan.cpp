@@ -50,6 +50,28 @@ namespace NWUClustering
 				noise++;
 		}	
 		
+		if(csvOutputFilename != NULL)
+		{
+			//Open csv file
+			ofstream csvFile;
+            csvFile.open(csvOutputFilename);
+            //Add each point in data set
+            //First column is cluster label
+            for(int i = 0; i < m_pts->m_i_num_points; i++)
+            {
+				int clusterID = m_pid_to_cid[i];
+				csvFile << clusterID << ',';
+				for(int j = 0; j < m_pts->m_i_dims; j++)
+				{
+					csvFile << m_pts->m_points[i][j];
+					if(j < m_pts->m_i_dims - 1)
+						csvFile << ',';
+				}
+				
+				csvFile << '\n';
+			}
+		}
+		
 		// Output summary information
 		o << endl;
 		o << "Total points " << noise + sum_points << " pt_in_cls " << sum_points << " noise " << noise << endl;
@@ -122,6 +144,28 @@ namespace NWUClustering
 			}
 		}
 
+
+		if(csvOutputFilename != NULL)
+		{
+			//Open csv file
+			ofstream csvFile;
+            csvFile.open(csvOutputFilename);
+            //Add each point in data set
+            //First column is cluster label
+            for(int i = 0; i < m_pts->m_i_num_points; i++)
+            {
+				int clusterID = clusters[i];
+				csvFile << clusterID << ',';
+				for(int j = 0; j < m_pts->m_i_dims; j++)
+				{
+					csvFile << m_pts->m_points[i][j];
+					if(j < m_pts->m_i_dims - 1)
+						csvFile << ',';
+				}
+				
+				csvFile << '\n';
+			}
+		}
 		// Output summary information
 		o << endl;
 		o << "Total points " << noise + sum_points << " pt_in_cls " << sum_points << " noise " << noise << endl;
@@ -129,7 +173,9 @@ namespace NWUClustering
 
 		cout << "Total points " << noise + sum_points << " pt_in_cls " << sum_points << " noise " << noise << endl;
 		cout << "Number of clusters: " << count << endl;
-
+		
+	
+		
 		clusters.clear();
 	}
 

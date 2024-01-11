@@ -1,5 +1,8 @@
 #include "sng.h"
 
+void displayScatterPlot2D(NWUClustering::ClusteringAlgo * algorithm, vector<int> * clusters);
+void displayScatterPlot2D(NWUClustering::ClusteringAlgo * algorithm);
+
 
 namespace NWUClustering
 {
@@ -53,6 +56,15 @@ namespace NWUClustering
             } else {
                 o << i << " | " << id << endl;
             }
+//--------------------CHANGE FOR DATA OUTPUT------------------------            
+            o << " Value: (";
+			//Outputing datapoint 
+			for(int j = 0; j < m_pts->m_i_dims; j++)
+			{
+				o << m_pts->m_points[i][j] << ", ";
+			}
+			o << ")" << endl;
+//--------------------END CHANGE FOR DATA OUTPUT--------------------			
 		}
 
 		for(i = 0; i < m_clusters.size(); i++) {
@@ -79,7 +91,29 @@ namespace NWUClustering
         o << endl;
         o << "Total points " << unclustered + noise + sum_points << " | pts_cls " << sum_points << " | noise " << noise << " | pts_uncls " << unclustered << endl;
         o << "Number of clusters: " << m_clusters.size() << endl;
-
+		
+		if(csvOutputFilename != NULL)
+		{
+			//Open csv file
+			ofstream csvFile;
+            csvFile.open(csvOutputFilename);
+            //Add each point in data set
+            //First column is cluster label
+            for(int i = 0; i < m_pts->m_i_num_points; i++)
+            {
+				int clusterID = m_pid_to_cid[i];
+				csvFile << clusterID << ',';
+				for(int j = 0; j < m_pts->m_i_dims; j++)
+				{
+					csvFile << m_pts->m_points[i][j];
+					if(j < m_pts->m_i_dims - 1)
+						csvFile << ',';
+				}
+				
+				csvFile << '\n';
+			}
+		}
+		
 	}
 
 	void ClusteringAlgo::writeClusters_uf(ostream& o)
@@ -140,8 +174,26 @@ namespace NWUClustering
             //Formatting for Output
             if (i < 10){
                 o << i << "  | " << clusters[m_parents[i]] << endl;
+                o << " Value: (";
+//---------------------DATA OUPUT CHANGE----------------------                
+				//Outputing datapoint 
+				for(int j = 0; j < m_pts->m_i_dims; j++)
+				{
+					o << m_pts->m_points[i][j] << ", ";
+				}
+				o << ")" << endl;
+//-----------------------------------------------------------------
             } else {
                 o << i << " | " << clusters[m_parents[i]] << endl;
+                o << " Value: (";
+//----------------------DATA OUTPUT CHANGE----------------------
+				//Outputing datapoint 
+				for(int j = 0; j < m_pts->m_i_dims; j++)
+				{
+					o << m_pts->m_points[i][j] << ", ";
+				}
+				o << ")" << endl;
+//------------------------------------------------------------------
             }
 		}
         
@@ -152,7 +204,29 @@ namespace NWUClustering
 
         cout << "Total points " << noise + sum_points << " pt_in_cls " << sum_points << " noise " << noise << endl;
 		cout << "Number of clusters: " << count << endl;
-
+		
+		if(csvOutputFilename != NULL)
+		{
+			//Open csv file
+			ofstream csvFile;
+            csvFile.open(csvOutputFilename);
+            //Add each point in data set
+            //First column is cluster label
+            for(int i = 0; i < m_pts->m_i_num_points; i++)
+            {
+				int clusterID = clusters[m_parents[i]];
+				csvFile << clusterID << ',';
+				for(int j = 0; j < m_pts->m_i_dims; j++)
+				{
+					csvFile << m_pts->m_points[i][j];
+					if(j < m_pts->m_i_dims - 1)
+						csvFile << ',';
+				}
+				
+				csvFile << '\n';
+			}
+		}
+		
 		clusters.clear();
 	}
 
