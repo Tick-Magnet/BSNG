@@ -24,6 +24,8 @@ static void usage(char* argv0) {
         "       * 2 odd      : odd seed values\n"
         "       * 3 Lower    : all under input seed\n"
         "       * 4 Upper    : all over input seed\n"
+        "       * 5 UserList :                                "
+        "    -u userList     : Select the seeds to be used from a list"
   
     "\n";
 
@@ -37,6 +39,7 @@ int main(int argc, char** argv) {
     int minPts, threads, opt, seeds, method;
     char* outfilename = NULL;
     char* infilename = NULL;
+    char* userfilename = NULL;
     bool classical, isBinaryFile, dbscan;
 
     // Initialize default values
@@ -45,6 +48,7 @@ int main(int argc, char** argv) {
     isBinaryFile = 0;
     outfilename = NULL;
     infilename = NULL;
+    userfilename = NULL;
     threads = 1;
     seeds = 1;
     method = 0;
@@ -52,10 +56,13 @@ int main(int argc, char** argv) {
     isBinaryFile = false;
     dbscan = false;
 
-    while ((opt = getopt(argc, argv, "i:t:p:m:e:s:o:v:s:z:bdxghncul")) != EOF) {
+    while ((opt = getopt(argc, argv, "i:u:t:p:m:e:s:o:v:s:z:bdxghncul")) != EOF) {
         switch (opt) {
             case 'i':
                 infilename = optarg;
+                break;
+            case 'u':
+                userfilename = optarg;
                 break;
             case 't':
                 threads = atoi(optarg);
@@ -95,13 +102,22 @@ int main(int argc, char** argv) {
         //printf("opt: %c, optarg: %s\n", opt, optarg); //Debugging for Arguments
     }
 
-    if (dbscan == false) //By Default Run SNG
+
+    // SNG (Runs by Default)
+
+    if (dbscan == false) 
     {
 
         // Check if required options are provided
         if (infilename == NULL || minPts < 0 || seeds < 0 || eps < 0 || threads < 0) {
             usage(argv[0]);
             exit(-1);
+        }
+
+        if (threads > seeds) {
+
+            cout << "More Threads than Seeds." << endl;
+            threads = seeds; 
         }
         
         cout << endl;
@@ -156,13 +172,15 @@ int main(int argc, char** argv) {
             outfile.open(outfilename);
 
                 if (classical == true) {
-                sng.writeClusters(outfile); //Sequential 
+                sng.writeClusters(outfile); // Sequential 
             } else {
                 sng.writeClusters_uf(outfile); // Parallel
             }
 
             outfile.close();
         }
+
+    // DBSCAN
 
     } else {
 
@@ -233,8 +251,6 @@ int main(int argc, char** argv) {
             outfile.close();
         }
     }
-
-	
 
     return 0;
 }
