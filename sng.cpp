@@ -454,12 +454,12 @@ void run_sng_algo_uf(ClusteringAlgo& sng) {
 
                     //Merge Neighborhood
                     else 
-                    {
-                        prID[neighbor_point_id] = thread_id;
+                    {                        
 
                         if (prID[neighbor_point_id] == -1) {
                             //Adding Point to Queue
                             pointStack.push(neighbor_point_id);
+                            prID[neighbor_point_id] = thread_id;
                         }
                         
                         //Change Roots
