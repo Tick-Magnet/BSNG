@@ -39,6 +39,7 @@ int main(int argc, char** argv) {
     int minPts, threads, opt, seeds, method;
     char* outfilename = NULL;
     char* infilename = NULL;
+    char* csvOutputFilename = NULL;
     char* userfilename = NULL;
     bool classical, isBinaryFile, dbscan;
 
@@ -58,6 +59,9 @@ int main(int argc, char** argv) {
 
     while ((opt = getopt(argc, argv, "i:u:t:p:m:e:s:o:v:s:z:bdxghncul")) != EOF) {
         switch (opt) {
+			case 'v':
+				csvOutputFilename = optarg;
+				break;
             case 'i':
                 infilename = optarg;
                 break;
@@ -130,7 +134,7 @@ int main(int argc, char** argv) {
         // Create an instance of the ClusteringAlgo class
         NWUClustering::ClusteringAlgo sng;
         sng.set_sng_params(eps, minPts, seeds, method);
-
+		sng.csvOutputFilename = csvOutputFilename;
         cout << "Input parameters " << " minPts " << minPts << " eps " << eps << " seeds " << seeds << endl;
 
         // Measure the time to Read File Data
@@ -200,7 +204,7 @@ int main(int argc, char** argv) {
         // Create an instance of the ClusteringAlgo class
         NWUClustering::ClusteringAlgoDBS dbs;
         dbs.set_dbs_params(eps, minPts);
-
+		dbs.csvOutputFilename = csvOutputFilename;
         cout << "Input parameters " << " minPts " << minPts << " eps " << eps << endl;
 
         // Measure the time to Read File Data

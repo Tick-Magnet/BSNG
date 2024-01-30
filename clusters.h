@@ -31,6 +31,7 @@ namespace NWUClustering {
         vector<int> m_pid_to_cid;       // Mapping from point id to cluster id
         vector<vector<int>> m_clusters; // Vector of clusters
         int m_parcent_of_data;          // Percentage of data
+        char* csvOutputFilename;		// Filename of CSV output file
     };
 }
 
