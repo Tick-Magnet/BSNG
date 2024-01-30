@@ -5,6 +5,7 @@
 #include "utils.h"
 #include "clusters.h"
 #include <queue>
+#include <stack>
 #include <random>
 #include <algorithm>
 

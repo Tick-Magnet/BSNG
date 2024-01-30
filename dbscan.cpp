@@ -33,7 +33,8 @@ namespace NWUClustering
 
 			//Formatting for Output
             if (i < 10){
-                o << " " << i << " | " << id << endl;
+                o << " " << i << "  | " << id << endl;
+
             } else {
                 o << i << " | " << id << endl;
             }
@@ -97,7 +98,8 @@ namespace NWUClustering
         o << "ID" << " | " << "Cluster" << endl; 
 
 		// Calculate cluster information
-		for(i = 0; i < m_pts->m_i_num_points; i++) {
+		for(i = 0; i < m_pts->m_i_num_points; i++)
+		{
 			root = m_parents[i];
 
 			// Get the number of trees
@@ -122,7 +124,8 @@ namespace NWUClustering
 
 		int count = 0;
 		// Process cluster information
-		for (i = 0; i < m_pts->m_i_num_points; i++) {
+		for (i = 0; i < m_pts->m_i_num_points; i++) 
+		{
 			if (clusters[i] == 1) {
 				// Vertex i is noise
 				clusters[i] = 0;
@@ -138,11 +141,7 @@ namespace NWUClustering
 
 		// Write point id and cluster ids to the output stream
 		for (i = 0; i < m_pts->m_i_num_points; i++) {
-			if (clusters[m_parents[i]] == 1) {
-				o << i << " | " << clusters[m_parents[i]] << " *** " << endl;
-			} else {
-			o << i << " | " << clusters[m_parents[i]] << endl;
-			}
+				o << i << " | " << clusters[m_parents[i]] << endl;
 		}
 
 
@@ -244,6 +243,7 @@ namespace NWUClustering
 
 				ne.clear();
             	dbs.m_kdtree->r_nearest_around_point(pid, 0, dbs.m_epsSquare, ne);
+	
 
 				if(ne.size() >= dbs.m_minPts) {
 					dbs.m_corepoint[pid] = 1;
@@ -434,7 +434,8 @@ namespace NWUClustering
 				dbs.m_visited[pid] = true;
 				ne.clear();
 				dbs.m_kdtree->r_nearest_around_point(pid, 0, dbs.m_epsSquare, ne);
-				
+
+
 				if(ne.size() < dbs.m_minPts)
 					dbs.m_noise[pid] = true;
 				else {

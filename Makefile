@@ -2,7 +2,7 @@
 
 # Compiler and compilation flags
 CC = g++
-CFLAGS = -c -fopenmp -O3
+CFLAGS = -c -fopenmp -O3 -g
 LDFLAGS =
 LIBS = -fopenmp -O3
 

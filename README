@@ -1,4 +1,4 @@
-A Disjoint-Set Data Structure based Parallel Sow & Grow (DBSCAN) clustering implementation (OpenMP version)
+A Disjoint-Set Data Structure based Parallel Sow & Grow (& DBSCAN) clustering implementation using OpenMP
 
 How to run the tool:
 1. Compile the source files using the following command
@@ -22,5 +22,6 @@ How to run the tool:
 	binary file:
 	number of points, N and number of dimensions, D (each 4 bytes) followed by the points coordinates (N x D floating point numbers).
 
-	text file:
+	
+	text file: <?> Not Working
 	each line is a point (no need to mention the number of points or the number of dimensions).
