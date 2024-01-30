@@ -156,7 +156,7 @@ namespace NWUClustering
             //First column is cluster label
             for(int i = 0; i < m_pts->m_i_num_points; i++)
             {
-				int clusterID = clusters[i];
+				int clusterID = clusters[m_parents[i]];
 				csvFile << clusterID << ',';
 				for(int j = 0; j < m_pts->m_i_dims; j++)
 				{

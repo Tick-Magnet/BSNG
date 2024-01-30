@@ -39,7 +39,7 @@ int main(int argc, char** argv) {
     int minPts, threads, opt, seeds, method;
     char* outfilename = NULL;
     char* infilename = NULL;
-    char* csvOutputFilename = NULL;
+    char* csvOutputFilename = "graph.csv";
     char* userfilename = NULL;
     bool classical, isBinaryFile, dbscan;
 
