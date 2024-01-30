@@ -25,3 +25,11 @@ How to run the tool:
 	
 	text file: <?> Not Working
 	each line is a point (no need to mention the number of points or the number of dimensions).
+
+4. Visualization: 
+	
+	After running the system an output file named graph.csv will be generated. Take this file, place it in the utilities folder, and run ClusterVisualizer.py with the graph file as an argument.
+	This will require the Seaborn package and Python to be installed on your system.
+	
+	Example:
+	python3 ClusterVisualizer.py -i graph.csv
