@@ -52,7 +52,7 @@ namespace NWUClustering {
 
 				point_coord_type* pt;					
 				
-                pt = (point_coord_type*) malloc(dims * sizeof(point_coord_type));
+                pt = new point_coord_type[dims];
                         
                 for (i = 0; i < num_points; i++){
                     file.read((char*)pt, dims*sizeof(point_coord_type));

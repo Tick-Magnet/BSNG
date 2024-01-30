@@ -1,1 +1,4 @@
+/// GUI Interface Different Types of Seed Inputs
 /// Calculate Error Between Actual VS. Found (15% Seeds - Compared to Total Cluster)
+///Fix issue with cluster merging in sng parallel.
+//Default value for threads
