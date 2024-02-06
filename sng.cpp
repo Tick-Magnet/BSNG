@@ -447,9 +447,19 @@ void run_sng_algo_uf(ClusteringAlgo& sng) {
 
     vector<int> prID; 
     prID.resize(sng.m_pts->m_i_num_points, -1);
+    
+    int loadBalancingRequests[max_threads];
+    //initilize values to -1
+    for(int i = 0; i < max_threads; i++)
+	{
+		loadBalancingRequests[i] = -1;
+	}
+    
+    //Lock for loadBalancingRequests array
+	omp_lock_t *loadBalancingLock =(omp_lock_t*) malloc(sizeof(omp_lock_t));
+	omp_init_lock(loadBalancingLock);
 
-
-    #pragma omp parallel private(root1, root2, thread_id, neighbors, neighbor_point_id, i, j, point_id) shared(pointStacks, sng, prID)
+    #pragma omp parallel private(root1, root2, thread_id, neighbors, neighbor_point_id, i, j, point_id) shared(pointStacks, sng, prID, loadBalancingLock, loadBalancingRequests)
     {
         
         //Get Thread ID
@@ -482,9 +492,38 @@ void run_sng_algo_uf(ClusteringAlgo& sng) {
         }
 
         #pragma omp barrier
-
         while (!pointStack.empty()) 
         {
+			if(loadBalancingRequests[thread_id] != -1)
+			{
+				int callingThread = loadBalancingRequests[thread_id];
+				//Grant calling thread half of point stack
+				int numberToSend = pointStack.size() / 2;
+				int tempPoint;
+				for(int i = 0; i < numberToSend; i++)
+				{
+					cout << "Break\n";
+					//take points from back of stack
+					tempPoint = pointStack.top();
+					pointStack.pop();
+										cout << "Break2\n";
+
+										
+
+					//Reassign prID values to new thread
+					prID[tempPoint] = callingThread;
+					
+					//Push point onto calling thread's stack
+					pointStacks[callingThread].push(tempPoint);
+				}
+				
+				//Flip flag back to -1
+				omp_set_lock(loadBalancingLock);
+					//Flipping requesting threads flag back to -1
+					loadBalancingRequests[callingThread] = -1;
+					loadBalancingRequests[thread_id] = -1;
+				omp_unset_lock(loadBalancingLock);
+			}
             int currentPoint = pointStack.top();
             pointStack.pop();
            
@@ -562,7 +601,22 @@ void run_sng_algo_uf(ClusteringAlgo& sng) {
                     }
                 }
             }
+            //Grab other data points if available
+			for(int i = 0; i < max_threads; i++)
+			{
+				omp_set_lock(loadBalancingLock);
+				if(thread_id != i && pointStacks[i].size() >= 20 && loadBalancingRequests[i] == -1)
+				{
+					loadBalancingRequests[i] = thread_id;
+					loadBalancingRequests[thread_id] = -2;
+					omp_unset_lock(loadBalancingLock);
+					//Busy wait until points granted from other thread
+					while(loadBalancingRequests[thread_id] == -2);
+					break;
+				}
+			}
         }
+       
     }    
 
     // Continue with merging clusters using locks
