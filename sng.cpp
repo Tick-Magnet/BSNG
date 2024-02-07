@@ -613,7 +613,7 @@ void run_sng_algo_uf(ClusteringAlgo& sng) {
 				for(int i = 0; i < max_threads; i++)
 				{
 					omp_set_lock(loadBalancingLock);
-					if(thread_id != i && pointStacks[i].size() >= 20 && loadBalancingRequests[i] == -1)
+					if(thread_id != i && pointStacks[i].size() >= 2 && loadBalancingRequests[i] == -1)
 					{
 						loadBalancingRequests[i] = thread_id;
 						loadBalancingRequests[thread_id] = -2;
@@ -633,6 +633,8 @@ void run_sng_algo_uf(ClusteringAlgo& sng) {
 				}
 			}
         }
+        			cout << thread_id << " is exiting\n";
+
     }    
 
     // Continue with merging clusters using locks
