@@ -13,4 +13,5 @@ typedef struct
 	char b;
 } Pixel;
 
-void getPixelData(FILE *bitmapFile, Pixel *pixelArray, int *pixelsRead);
+void getPixelData(FILE *bitmapFile, Pixel **pixelArray, int *pixelsRead);
+void outputCSV(FILE *outputFile, Pixel *pixelArray, int pixelArraySize);
