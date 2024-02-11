@@ -89,12 +89,12 @@ void getPixelData(FILE *bitmapFile, Pixel **pixelArray, int *pixelsRead)
 	//Get width (at position 0x12)
 	char *tempPointer = buffer + 0x12;
 	//Cast down to 32 bit signed int
-	width = (int32_t)(*tempPointer);
+	width = *((int32_t*)tempPointer);
 	printf("width: %d\n", width);
 	
 	//Get height (at position 0x16)
 	tempPointer = buffer + 0x16;
-	height = (int32_t)(*tempPointer);
+	height = *((int32_t*)tempPointer);
 	printf("height: %d\n", height);
 	
 	//Allocate memory for pixel array
