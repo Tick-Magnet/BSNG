@@ -131,12 +131,9 @@ namespace NWUClustering {
 					while(std::getline(ss,token,',')) { // get the corordinate of the points
 						d = stod(token);
 						m_pts->m_points[i][j] = d;
-
-						cout << m_pts->m_points[i][j] <<  " ";
 						j++;
 
 					}
-					cout << endl;
 					i++;
 					getline(file, line);
     			}
