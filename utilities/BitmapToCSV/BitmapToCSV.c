@@ -74,6 +74,8 @@ void outputCSV(FILE *outputFile, Pixel *pixelArray, int pixelArraySize)
 	}
 }
 
+//Using Windows bitmap file type see example 2 at:
+//https://en.wikipedia.org/wiki/BMP_file_format#Bitmap_file_header
 void getPixelData(FILE *bitmapFile, Pixel **pixelArray, int *pixelsRead)
 {
 	int32_t width;
