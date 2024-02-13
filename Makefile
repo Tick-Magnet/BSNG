@@ -27,7 +27,7 @@ $(APP): $(OBJS)
 # Clean up compiled files
 clean:
 	rm -f *.o $(APP)
-
+	rm utilities/graph.csv
 
 #Instructions for Use
 #   make        -- compiles your project into program.exe

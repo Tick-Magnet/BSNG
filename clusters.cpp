@@ -76,12 +76,14 @@ namespace NWUClustering {
 			cout << " - - -  Non-Binary Text File Inputted - - - " << endl;
 
 			// Process text file
-			string line, line2, buf;
+			string line, line2, token, buf;
 			ifstream file(infilename);
 			stringstream ss;
 
 			if (file.is_open())
   			{
+				cout << "Openned File" << endl;
+
 				// Get the dimensions from the first line
 				getline(file, line);
 				line2 = line;
@@ -89,8 +91,10 @@ namespace NWUClustering {
 				ss << line2;
 			
 				dims = 0;
-				while(ss >> buf) // get the corordinate of the points
+
+				while(std::getline(ss,token,',')) { // get the corordinate of the points
 					dims++;
+				}
 
 				// Count the number of points
 				num_points = 0;
@@ -123,12 +127,13 @@ namespace NWUClustering {
 					ss << line;
 
 					j = 0;
-					while(ss >> buf && j < dims) //Get the corordinate of the points
-					{
-						m_pts->m_points[i][j] = atof(buf.c_str());
+					double d; 
+					while(std::getline(ss,token,',')) { // get the corordinate of the points
+						d = stod(token);
+						m_pts->m_points[i][j] = d;
 						j++;
+
 					}
-					
 					i++;
 					getline(file, line);
     			}

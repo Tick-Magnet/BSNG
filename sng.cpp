@@ -209,13 +209,14 @@ namespace NWUClustering
         cout << "Total points " << noise + sum_points << " pt_in_cls " << sum_points << " noise " << noise << endl;
 		cout << "Number of clusters: " << count << endl;
 		
+	const string directoryPath = "utilities/";
+	string fullPath = directoryPath + csvOutputFilename;		
 		if(csvOutputFilename != NULL)
 		{
 			cout << "Writing csv file\n";
-
+			
 			//Open csv file
-			ofstream csvFile;
-            csvFile.open(csvOutputFilename);
+			ofstream csvFile(fullPath);
       
             //Add each point in data set
             //First column is cluster label
