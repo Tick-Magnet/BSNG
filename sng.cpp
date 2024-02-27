@@ -622,8 +622,8 @@ void run_sng_algo_uf(ClusteringAlgo& sng) {
 						//Busy wait until points granted from other thread
 						while(loadBalancingRequests[thread_id] == -2)
 						{
-							//cout << thread_id << " Waiting for " << i << endl;
-							//cout << pointStacks[i].size() << endl;
+							cout << thread_id << " Waiting for " << i << endl;
+							cout << pointStacks[thread_id].size() << endl;
 						}
 						break;
 					}
