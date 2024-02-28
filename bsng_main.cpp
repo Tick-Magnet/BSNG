@@ -27,7 +27,7 @@ static void usage(char* argv0) {
         "       * 4 Upper    : all over input seed\n"
         "       * 5 UserList :                                "
         "    -u userList     : Select the seeds to be used from a list"
-	"    -j visualize    : Create visualization"
+	
   
     "\n";
 
@@ -44,7 +44,6 @@ int main(int argc, char** argv) {
     char* csvOutputFilename = "graph.csv";
     char* userfilename = NULL;
     bool classical, isBinaryFile, dbscan;
-    bool visualize;
 
     // Initialize default values
     minPts = -1;
@@ -59,9 +58,8 @@ int main(int argc, char** argv) {
     classical = false;
     isBinaryFile = false;
     dbscan = false;
-    visualize = false;
 
-    while ((opt = getopt(argc, argv, "i:u:t:p:m:e:s:o:v:s:z:bdxghnculj")) != EOF) {
+    while ((opt = getopt(argc, argv, "i:u:t:p:m:e:s:o:v:s:z:bdxghncul")) != EOF) {
         switch (opt) {
 	    case 'v':
 		csvOutputFilename = optarg;
@@ -99,9 +97,6 @@ int main(int argc, char** argv) {
             case 'b':
                 isBinaryFile = true;
                 break;
-	    case 'j':
-		visualize = true;
-		break;
             case '?':
                 usage(argv[0]);
                 break;
@@ -189,23 +184,6 @@ int main(int argc, char** argv) {
 
             outfile.close();
 
-	    // Running visualiztion code
-	    if(visualize == true){
-		cout << "Creating Visualization\n";
-
-		// Declaring variables used in command for visualization
-		const char* cdcommand = "cd /home/jake/BSNG-MAIN/BSNG/utilities";
-		const char* pycommand = "python3 ClusterVisualizer.py -i graph.csv";
-		std::string command = std::string(cdcommand) + " && " + pycommand;
-		
-		// Running visualization code from command line
-	        int returnVal = system(command.c_str());
-
-		// Checking status of visualization system call
-		if (returnVal != 0){
-			cout << "error while creating visualization";
-		}	
-	    }
         }
 
     // DBSCAN
