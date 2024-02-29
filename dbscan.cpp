@@ -50,13 +50,13 @@ namespace NWUClustering
 			if(m_noise[i])
 				noise++;
 		}	
-		const string directoryPath = "utilities/";
-		string fullPath = directoryPath + csvOutputFilename;
+		
 		if(csvOutputFilename != NULL)
 		{
 			cout << "Writing csv file\n";
 			//Open csv file
-			ofstream csvFile(fullPath);
+			ofstream csvFile;
+            csvFile.open(csvOutputFilename);
             //Add each point in data set
             //First column is cluster label
             for(int i = 0; i < m_pts->m_i_num_points; i++)
