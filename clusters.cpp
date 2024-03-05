@@ -155,18 +155,17 @@ namespace NWUClustering {
 	// Function to build a k-d tree
     int Clusters::build_kdtree() {
         if (m_pts == nullptr) {
-            cout << "Point set is empty" << endl;
+            cout << "Point set is empty." << endl;
             return -1;
         }
 
         m_kdtree = new kdtree2(m_pts->m_points, false); //kdtree constructor
 
         if (m_kdtree == nullptr) {
-            cout << "Failed to allocate a new kd tree" << endl;
+            cout << "Failed to allocate a new kdtree." << endl;
             return -1;
         }
 		
-		cout << "kdtree successfully built" << endl ;
         return 0;
     }
 }

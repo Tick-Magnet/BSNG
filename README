@@ -1,17 +1,17 @@
-A Disjoint-Set Data Structure based Parallel Sow & Grow (& DBSCAN) clustering implementation using OpenMP
+A Focused Clustering implementation of the density-based Sow & Grow clustering algorithm using OpenMP
 
-How to run the tool:
+How to run the system:
 1. Compile the source files using the following command
 
 	make
 
 2. Run using following command 
 
-	./bsng -i filename -b -m minpts -e epsilon -o output -t threads
+	./bsng -i filename -b -m minpts -e epsilon -s seeds -t threads -o output 
 
 	Example:
 
-	./bsng -i clus50k.bin -b -m 5 -e 25 -t 8 -o test
+	./bsng -i clus50k.bin -b -m 5 -e 25 -s 5000-t 8 -o test
 
 	run the following to get detail description on the program arguments
 
@@ -23,13 +23,19 @@ How to run the tool:
 	number of points, N and number of dimensions, D (each 4 bytes) followed by the points coordinates (N x D floating point numbers).
 
 	
-	text file: <?> Not Working
-	each line is a point (no need to mention the number of points or the number of dimensions).
+	csv file: each row is a point, each coloumn is a dimension
 
 4. Visualization: 
 	
-	After running the system an output file named graph.csv will be generated. Take this file, place it in the utilities folder, and run ClusterVisualizer.py with the graph file as an argument.
+	After running the system an output file named visData.csv will be generated in the utilities folder. 
+	Use the -j flag to run ClusterVisualizer.py with the visData.csv file as an argument.
 	This will require the Seaborn package and Python to be installed on your system.
 	
 	Example:
-	python3 ClusterVisualizer.py -i graph.csv
+	python3 ClusterVisualizer.py -i visData.csv
+
+5. Data Generation Tools
+
+	1. 
+	2. 
+	3.

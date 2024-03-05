@@ -56,7 +56,6 @@ namespace NWUClustering
             } else {
                 o << i << " | " << id << endl;
             }
-//--------------------CHANGE FOR DATA OUTPUT------------------------            
             o << " Value: (";
 			//Outputing datapoint 
 			for(int j = 0; j < m_pts->m_i_dims; j++)
@@ -64,7 +63,6 @@ namespace NWUClustering
 				o << m_pts->m_points[i][j] << ", ";
 			}
 			o << ")" << endl;
-//--------------------END CHANGE FOR DATA OUTPUT--------------------			
 		}
 
 		for(i = 0; i < m_clusters.size(); i++) {
@@ -92,13 +90,15 @@ namespace NWUClustering
         o << "Total points " << unclustered + noise + sum_points << " | pts_cls " << sum_points << " | noise " << noise << " | pts_uncls " << unclustered << endl;
         o << "Number of clusters: " << m_clusters.size() << endl;
 		
+        const string directoryPath = "utilities/";
+	    string fullPath = directoryPath + csvOutputFilename;	
 		if(csvOutputFilename != NULL)
 		{
 			cout << "Writing csv file\n";
 
 			//Open csv file
 			ofstream csvFile;
-            csvFile.open(csvOutputFilename);
+            csvFile.open(fullPath);
             //Add each point in data set
             //First column is cluster label
             for(int i = 0; i < m_pts->m_i_num_points; i++)
@@ -179,25 +179,21 @@ namespace NWUClustering
             if (i < 10){
                 o << i << "  | " << clusters[m_parents[i]] << endl;
                 o << " Value: (";
-//---------------------DATA OUPUT CHANGE----------------------                
 				//Outputing datapoint 
 				for(int j = 0; j < m_pts->m_i_dims; j++)
 				{
 					o << m_pts->m_points[i][j] << ", ";
 				}
 				o << ")" << endl;
-//-----------------------------------------------------------------
             } else {
                 o << i << " | " << clusters[m_parents[i]] << endl;
                 o << " Value: (";
-//----------------------DATA OUTPUT CHANGE----------------------
 				//Outputing datapoint 
 				for(int j = 0; j < m_pts->m_i_dims; j++)
 				{
 					o << m_pts->m_points[i][j] << ", ";
 				}
 				o << ")" << endl;
-//------------------------------------------------------------------
             }
 		}
         
@@ -279,7 +275,7 @@ namespace NWUClustering
                         }
                     }
 
-                    //cout << endl; // Print a newline to end seed list
+                    // cout << endl; // Print a newline to end seed list
                     break;
                 }
             case 1: 
@@ -299,7 +295,7 @@ namespace NWUClustering
                         cout << odd_seed << " ";
                     }
 
-                    sng.m_seeds = half; //This is so that sequential the system will loop through all seeds.
+                    sng.m_seeds = half; // This is so that sequential the system will loop through all seeds.
 
                     cout << endl; // Print a newline to end seed list
                     cout << endl;
@@ -403,15 +399,11 @@ namespace NWUClustering
     }
 
 
-// Run the Union-Find version of the Sow-and-Grow (SNG) clustering algorithm
+// Run the parallel version of the Sow-and-Grow (SNG) clustering algorithm
 void run_sng_algo_uf(ClusteringAlgo& sng) {	
    
-    //Select Seeds for Algorithm
+    // Select Seeds for Algorithm
     seed_selection(sng);
-
-    //sng.selected_seeds.reserve(sng.m_seeds);
-    //sng.selected_seeds.push_back(0);
-    //sng.selected_seeds.push_back(1);
 
     // Initialize clustering parameters
     int thread_id, i, j, k, neighbor_point_id, point_id, root1, root2;
@@ -420,7 +412,7 @@ void run_sng_algo_uf(ClusteringAlgo& sng) {
     sng.m_clusters.clear();
     kdtree2_result_vector neighbors;
 
-    sng.m_parents.resize(sng.m_pts->m_i_num_points, -1);
+    sng.m_parents.resize(sng.m_pts->m_i_num_points, -1); 
     sng.m_member.resize(sng.m_pts->m_i_num_points, 0);
     sng.m_corepoint.resize(sng.m_pts->m_i_num_points, 0);
 
@@ -432,7 +424,6 @@ void run_sng_algo_uf(ClusteringAlgo& sng) {
     vector<int>* point_indices = sng.m_kdtree->getIndex();
     thread_id_map.resize(sng.m_pts->m_i_num_points, -1); 
     
-    //Setting all points to the same thread
     double start_time = omp_get_wtime();
 
     // Reserve space for the merge vector
@@ -440,23 +431,21 @@ void run_sng_algo_uf(ClusteringAlgo& sng) {
     {
         merge[i].reserve(sng.m_pts->m_i_num_points);
     }
-
-
     
     // Initialize stack for point expansion
-    vector<stack<int>> pointStacks(max_threads); // Create a vector of stack, one for each thread
+    vector<stack<int>> pointStacks(max_threads); // Create a stack of vectors, one for each thread
 
-    vector<int> prID; 
-    prID.resize(sng.m_pts->m_i_num_points, -1);
+    vector<int> prID; // Point ID
+    prID.resize(sng.m_pts->m_i_num_points, -1); // Assign all points to thread: -1
     
+    // Initilize load balancing values to -1
     int loadBalancingRequests[max_threads];
-    //initilize values to -1
     for(int i = 0; i < max_threads; i++)
 	{
 		loadBalancingRequests[i] = -1;
 	}
     
-    //Lock for loadBalancingRequests array
+    // Lock for loadBalancingRequests array
 	omp_lock_t *loadBalancingLock =(omp_lock_t*) malloc(sizeof(omp_lock_t));
 	omp_init_lock(loadBalancingLock);
 	
@@ -464,44 +453,45 @@ void run_sng_algo_uf(ClusteringAlgo& sng) {
     #pragma omp parallel private(root1, root2, thread_id, neighbors, neighbor_point_id, i, j, point_id) shared(pointStacks, sng, prID, loadBalancingLock, loadBalancingRequests)
     {
         
-        //Get Thread ID
+        // Get Thread ID
         thread_id = omp_get_thread_num();
         stack<int>& pointStack = pointStacks[thread_id];
 
 
         // Distribute seeds to threads without overlap
         int seeds_per_thread = sng.m_seeds / max_threads;
-        int extra_seeds = sng.m_seeds % max_threads;  // Calculate remaining seeds
-        int start_seed = thread_id * seeds_per_thread + min(thread_id, extra_seeds);
-        int end_seed = (thread_id + 1) * seeds_per_thread + min(thread_id + 1, extra_seeds);
+        int extra_seeds = sng.m_seeds % max_threads;  // Distribute remaining seeds
+        int start_seed = thread_id * seeds_per_thread + min(thread_id, extra_seeds); // First Seed for Thread
+        int end_seed = (thread_id + 1) * seeds_per_thread + min(thread_id + 1, extra_seeds); // Last Seed for Thread
 
-        //Assigning Seeds to Stack
+        // Assigning Seeds to Stack
         for (int seed_idx = start_seed; seed_idx < end_seed; ++seed_idx) {
             pointStack.push(sng.selected_seeds[seed_idx]);
             prID[seed_idx] = thread_id;
         }
 
 
-        //Assigning Point Parents
+        // Assigning Point's Parent to Itself
         int points_per_thread = sng.m_pts->m_i_num_points / max_threads;
         int extra_points = sng.m_pts->m_i_num_points % max_threads;
         int start_point = thread_id * points_per_thread + min(thread_id, extra_points);
         int end_point = (thread_id + 1) * points_per_thread + min(thread_id + 1, extra_points);
 
-        //Loop through every point assign default parent
+        // Loop through every point assign default parent
         for (int point_id = 0; point_id < sng.m_pts->m_i_num_points; ++point_id) {
             sng.m_parents[point_id] = point_id;
         }
 
+        // Wait for all threads to claim seeds and assign point parents.
         #pragma omp barrier
 
+        // Primary Thread Stack
         while (!pointStack.empty()) 
         {
 			if(loadBalancingRequests[thread_id] != -1)
 			{
-
 				int callingThread = loadBalancingRequests[thread_id];
-				cout << thread_id << " sending points to " << callingThread << endl;
+				//cout << thread_id << " sending points to " << callingThread << endl;
 				//Grant calling thread half of point stack
 				int numberToSend = pointStack.size() / 2;
 				int tempPoint;
@@ -513,18 +503,16 @@ void run_sng_algo_uf(ClusteringAlgo& sng) {
 					pointStack.pop();
 					//cout << "Break2\n";
 
-										
-
 					//Reassign prID values to new thread
 					prID[tempPoint] = callingThread;
 					
 					//Push point onto calling thread's stack
 					pointStacks[callingThread].push(tempPoint);
 				}
-				cout << "grabbing lock\n";
+				//cout << "grabbing lock\n";
 				//Flip flag back to -1
 				omp_set_lock(loadBalancingLock);
-					cout << "flipping\n";
+					//cout << "flipping\n";
 					//Flipping requesting threads flag back to -1
 					loadBalancingRequests[callingThread] = -1;
 					loadBalancingRequests[thread_id] = -1;
@@ -538,6 +526,7 @@ void run_sng_algo_uf(ClusteringAlgo& sng) {
             neighbors.clear(); 
             sng.m_kdtree->r_nearest_around_point(currentPoint, 0, sng.m_epsSquare, neighbors);
 
+            // If Core Point
             if (neighbors.size() >= sng.m_minPts) 
             {
                 sng.m_corepoint[currentPoint] = 1;
@@ -610,20 +599,23 @@ void run_sng_algo_uf(ClusteringAlgo& sng) {
             }
             if(pointStack.empty())
             {
-				//Grab other data points if available
+				// Grab other data points if available
 				for(int i = 0; i < max_threads; i++)
 				{
 					omp_set_lock(loadBalancingLock);
-					if(thread_id != i && pointStacks[i].size() >= 2 && loadBalancingRequests[i] == -1)
+
+                    int threshold = 8; // Should be reviewed for optimization 
+
+					if(thread_id != i && pointStacks[i].size() >= threshold && loadBalancingRequests[i] == -1)
 					{
 						loadBalancingRequests[i] = thread_id;
 						loadBalancingRequests[thread_id] = -2;
 						omp_unset_lock(loadBalancingLock);
-						//Busy wait until points granted from other thread
+						// Busy wait until points granted from other thread
 						while(loadBalancingRequests[thread_id] == -2)
 						{
-							cout << thread_id << " Waiting for " << i << endl;
-							cout << pointStacks[thread_id].size() << endl;
+							//cout << thread_id << " Waiting for " << i << endl;
+							//cout << pointStacks[thread_id].size() << endl;
 						}
 						break;
 					}
@@ -634,8 +626,6 @@ void run_sng_algo_uf(ClusteringAlgo& sng) {
 				}
 			}
         }
-        			cout << thread_id << " is exiting\n";
-
     }    
 
     // Continue with merging clusters using locks
@@ -766,7 +756,7 @@ void run_sng_algo(ClusteringAlgo& sng) {
 
 	vector<int>* ind = sng.m_kdtree->getIndex();
 
-    cout << "Begin Sequential Sow & Grow (SSNG)" << endl;
+    cout << "Begin Sequential - Sow & Grow (S-SNG)" << endl;
 	double start = omp_get_wtime() ;		
 
 	// Iterate through points
@@ -825,7 +815,7 @@ void run_sng_algo(ClusteringAlgo& sng) {
 
     double stop = omp_get_wtime();
     cout << "Local computation took " << stop - start << " seconds." << endl;
-	cout << "No merging stage in classical SNG"<< endl;
+	cout << "No merging stage in Sequential SNG"<< endl;
 	ind = NULL;
 	ne.clear();
 	ne2.clear();

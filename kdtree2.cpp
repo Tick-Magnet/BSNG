@@ -63,8 +63,6 @@ kdtree2::kdtree2(array2dfloat& data_in, bool rearrange_in, int dim_in)
 
   if (dim_in > 0)
     dim = dim_in;
-  
-  cout << "building kdtree " << endl;
   build_tree();
   
   if (rearrange) {
