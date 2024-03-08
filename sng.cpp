@@ -1,4 +1,6 @@
 #include "sng.h"
+#include <thread>
+#include <chrono>
 
 void displayScatterPlot2D(NWUClustering::ClusteringAlgo * algorithm, vector<int> * clusters);
 void displayScatterPlot2D(NWUClustering::ClusteringAlgo * algorithm);
@@ -614,8 +616,7 @@ void run_sng_algo_uf(ClusteringAlgo& sng) {
 						// Busy wait until points granted from other thread
 						while(loadBalancingRequests[thread_id] == -2)
 						{
-							//cout << thread_id << " Waiting for " << i << endl;
-							//cout << pointStacks[thread_id].size() << endl;
+							std::this_thread::sleep_for(std::chrono::microseconds(1));
 						}
 						break;
 					}
