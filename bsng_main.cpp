@@ -68,7 +68,6 @@ int main(int argc, char** argv) {
         switch (opt) {
 			case 'l':
 				seedInputFileName = string(optarg);
-				cout << seedInputFileName <<endl;
 				break;
             case 'i':
                 infilename = optarg;
@@ -146,6 +145,7 @@ int main(int argc, char** argv) {
         // Create an instance of the ClusteringAlgo class
         NWUClustering::ClusteringAlgo sng;
         sng.set_sng_params(eps, minPts, seeds, method);
+        sng.seedInputFileName = seedInputFileName;
 		sng.csvOutputFilename = csvOutputFilename;
         cout << "Input parameters " << " minPts: " << minPts << ", eps: " << eps << ", seeds: " << seeds << endl;
 

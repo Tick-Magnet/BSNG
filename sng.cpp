@@ -379,7 +379,37 @@ namespace NWUClustering
                 }
             case 5: 
                 {
-                    vector<int> selected_seeds;
+					cout << "Reading seed input file" << endl;
+					string currentLine;
+                    //Open seed input file
+                    ifstream seedFile;
+                    cout << sng.seedInputFileName << endl;
+                    seedFile.open(sng.seedInputFileName);
+                    
+                    //Check that file opened correctly
+                    if(!seedFile.is_open())
+                    {
+						cout << "Could not open seed input file" << endl;
+						exit(1);
+					}
+					
+					//Get index line by line and push index to seed array
+					while(getline(seedFile, currentLine))
+					{
+						cout << currentLine << endl;
+						sng.selected_seeds.push_back(stoi(currentLine));
+					}
+					//Set m_seeds to size of seeds array
+					sng.m_seeds = sng.selected_seeds.size();
+					
+					//Check that at least 1 seed was entered 
+					if(sng.m_seeds = 0)
+					{
+						cout << "No seeds inputted" << endl;
+						exit(1);
+					}
+                    //Close file
+                    seedFile.close();
                     break;
                 }
 
@@ -391,7 +421,7 @@ namespace NWUClustering
                             "       * 2 odd      : odd seed values\n"
                             "       * 3 Lower    : all under input seed\n"
                             "       * 4 Upper    : all over input seed\n"
-                            "		* 5 File	 : Indexs from input file\n" << endl;
+                            "       * 5 File     : Indexs from input file\n" << endl;
                     exit(1);
                 }
         }
