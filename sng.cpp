@@ -390,7 +390,8 @@ namespace NWUClustering
                             "       * 1 even     : even seed values\n"
                             "       * 2 odd      : odd seed values\n"
                             "       * 3 Lower    : all under input seed\n"
-                            "       * 4 Upper    : all over input seed\n" << endl;
+                            "       * 4 Upper    : all over input seed\n"
+                            "		* 5 File	 : Indexs from input file\n" << endl;
                     exit(1);
                 }
         }

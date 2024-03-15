@@ -40,6 +40,8 @@ namespace NWUClustering
 		int 	m_minPts;
 		int 	m_seeds;
 		int     m_seedMethod;
+		
+		string seedInputFileName;
   
 		// Noise vector to mark noise points
         vector<bool> m_noise;

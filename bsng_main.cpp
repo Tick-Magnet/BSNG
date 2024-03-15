@@ -46,6 +46,7 @@ int main(int argc, char** argv) {
     char* userfilename = NULL;
     bool classical, isBinaryFile, dbscan;
     bool visualize;
+    string seedInputFileName;
 
     // Initialize Default Values
     minPts = -1;
@@ -63,8 +64,12 @@ int main(int argc, char** argv) {
     visualize = false;
 
     // Input Flags
-    while ((opt = getopt(argc, argv, "i:u:t:p:m:e:s:o:s:z:bdxghnculj")) != EOF) {
+    while ((opt = getopt(argc, argv, "i:u:t:p:m:e:s:o:s:z:l:bdxghncuj")) != EOF) {
         switch (opt) {
+			case 'l':
+				seedInputFileName = string(optarg);
+				cout << seedInputFileName <<endl;
+				break;
             case 'i':
                 infilename = optarg;
                 break;
