@@ -383,9 +383,7 @@ namespace NWUClustering
 					string currentLine;
                     //Open seed input file
                     ifstream seedFile;
-                    cout << sng.seedInputFileName << endl;
                     seedFile.open(sng.seedInputFileName);
-                    
                     //Check that file opened correctly
                     if(!seedFile.is_open())
                     {
@@ -396,14 +394,13 @@ namespace NWUClustering
 					//Get index line by line and push index to seed array
 					while(getline(seedFile, currentLine))
 					{
-						cout << currentLine << endl;
+						cout << stoi(currentLine) << endl;
 						sng.selected_seeds.push_back(stoi(currentLine));
 					}
 					//Set m_seeds to size of seeds array
 					sng.m_seeds = sng.selected_seeds.size();
-					
 					//Check that at least 1 seed was entered 
-					if(sng.m_seeds = 0)
+					if(sng.m_seeds == 0)
 					{
 						cout << "No seeds inputted" << endl;
 						exit(1);
